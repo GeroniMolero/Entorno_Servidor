@@ -18,6 +18,14 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Scanner;
+
+import org.yourcompany.laboral.DatosNoCorrectosException;
 
 /**
  *
@@ -25,18 +33,21 @@ import java.io.IOException;
  */
 public class CalculaNominas {
 
+    //Variables para guardar la info de los ficheros con los datos de los empleados
     private static final String EMPLEADOS_TXT = "empleados.txt";
     private static final String SUELDOS_DAT = "sueldos.dat";
 
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/gestion_de_nominas";
-    private static final String USER = "root";
-    private static final String PASSWORD = "123456";    
 
-    public static void main(String[] args) {
+    //Configuracion de la conexion con la base de datos
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/gestion_nominas";
+    private static final String USER = "root";
+    private static final String PASSWORD = "123456";
+    static Connection conn = null;    
+
+    public static void main(String[] args) throws DatosNoCorrectosException {
 
         //String EMPLEADOS_TXT = "empleados.txt";
         //String SUELDOS_DAT = "sueldos.dat";
-        
         try {
             Empleado e1 = new Empleado(4,7,"James Cosling", "32000031G", 'H');
             Empleado e2 = new Empleado("Ada Lovelace", "32000032G",'M');
@@ -49,8 +60,35 @@ public class CalculaNominas {
             }
 
         crearFicheroTexto();
+
         generarFicheroBinario();
         leerFicheroBinario();
+
+        crearDB();
+        conexionDB();
+        generarFicheroBinarioDesdeDB();
+        leerFicheroBinarioDB();
+
+        mostrarMenu();
+    }
+
+
+    private static void conexionDB(){
+        try {
+            conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            System.out.println("Conexión válida: " + conn.isValid(10));
+            System.out.println("Estado del autocommit: " + conn.getAutoCommit());
+        } catch (SQLException e) {
+            System.out.println("Ocurrió una excepción al conectar a la BD");
+        } finally {
+            try {
+                if (conn != null) {
+                    conn.close();
+                }
+            } catch (SQLException ex) {
+                System.out.println("Ocurrió una excepción al cerrar la BD");
+            }
+        }
     }
 
     private static void escribe(Empleado e1, Empleado e2){
@@ -72,6 +110,7 @@ public class CalculaNominas {
         }
     }
 
+    @Deprecated
     private static void generarFicheroBinario() {
         try (
             BufferedReader reader = new BufferedReader(new FileReader(EMPLEADOS_TXT));
@@ -95,6 +134,7 @@ public class CalculaNominas {
         }
     }
 
+    @Deprecated
     private static void leerFicheroBinario() {
     try (DataInputStream dis = new DataInputStream(new FileInputStream("sueldos.dat"))) {
         while (true) {
@@ -102,12 +142,125 @@ public class CalculaNominas {
             double sueldo = dis.readDouble();
             System.out.println("DNI: " + dni + ", Sueldo: " + sueldo);
         }
-    } catch (EOFException e) {
-        // Fin del archivo alcanzado, es normal
     } catch (IOException e) {
         System.err.println("Error al leer el archivo binario: " + e.getMessage());
     }
-}
+    }
+
+    private static void crearDB(){
+        String query = "CREATE DATABASE IF NOT EXISTS gestion_nominas;"+"USE gestion_nominas;"+
+        "CREATE TABLE Empleados(Dni varchar(9) PRIMARY KEY, Nombre varchar(50), Sexo char(1), Categoria int(11), Antiguedad int(11));"+
+        "CREATE TABLE Nominas(Dni varchar(9) Primary KEY, Sueldo int(11));";
+        try (
+            Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+        ){
+            System.out.println("Base de datos creada correctamente");
+        } catch (SQLException ex) {
+            System.err.println("Error al crear la base de datos");
+        }
+    }
+
+    private static void generarFicheroBinarioDesdeDB() {
+        String query = "SELECT E.dni, N.sueldo " +
+                       "FROM Empleados E JOIN Nominas N ON E.dni = N.dni";
+
+        try (
+            Connection conn = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            PreparedStatement ps = conn.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            DataOutputStream dos = new DataOutputStream(new FileOutputStream(SUELDOS_DAT))
+        ) {
+            while (rs.next()) {
+                String dni = rs.getString("dni");
+                double sueldo = rs.getDouble("sueldo");
+
+                dos.writeUTF(dni);
+                dos.writeDouble(sueldo);
+            }
+
+            System.out.println("Archivo binario '" + SUELDOS_DAT + "' creado desde MySQL.");
+
+        } catch (SQLException | IOException e) {
+            System.err.println("Error generando binario: " + e.getMessage());
+        }finally{
+            //conn.close();
+        }
+    }
+
+    private static void leerFicheroBinarioDB() {
+        System.out.println("Contenido de sueldos.dat:");
+        try (DataInputStream dis = new DataInputStream(new FileInputStream(SUELDOS_DAT))) {
+            while (true) {
+                String dni = dis.readUTF();
+                double sueldo = dis.readDouble();
+                System.out.println("DNI: " + dni + ", Sueldo: " + sueldo);
+            }
+        } catch (EOFException e) {
+        } catch (IOException e) {
+            System.err.println("Error al leer binario: " + e.getMessage());
+        }
+    }
+
+    private static void mostrarMenu(){
+        
+        System.out.println("-----------------------------\n" +
+        "MENU USUARIO\n"+
+        "-----------------------------\n"+
+        "1.Mostrar empleados\n"+
+        "2.Mostrar salario por dni\n"+
+        "3.Modificar datos de empleados\n"+
+        "4.Actualizar sueldo por dni\n"+
+        "5.Actualizar todos los sueldos\n"+
+        "6.Realizar copia de seguridad\n"+
+        "0.Salir\n"+
+        "------------------------------\n"+
+        "Elige una opcion:");
+        menuOpciones();
+    }
+
+    @SuppressWarnings("resource")
+    private static void menuOpciones(){
+        int opcion;
+        try (Scanner sca = new Scanner(System.in)) {
+            opcion = sca.nextInt();
+        }
+        while(opcion!=0){
+        switch (opcion) {
+            case 1:
+                consultaDB("SELECT * FROM Empleados;");
+                break;
+            case 2:
+                String Dni;
+                System.out.println("Dni del empleado: ");
+                Dni = new Scanner(System.in).nextLine();
+
+                consultaDB("SELECT * FROM Empleados where Dni like "+Dni+";");
+                break;
+            case 3:
+
+                consultaDB("UPDATE");
+                break;
+            case 4:
+                consultaDB("USER");
+                break;
+            case 5:
+                consultaDB("USER");
+                break;
+            case 6:
+                consultaDB("USER");
+                break;
+            default:
+                throw new AssertionError("No has seleccionado una opcion valida");
+        }
+        }
+        System.out.println("Adios");
+    }
+
+    private static void consultaDB(String query){
+
+    }
 
 
 }
