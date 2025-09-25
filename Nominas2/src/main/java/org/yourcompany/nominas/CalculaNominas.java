@@ -215,44 +215,30 @@ public class CalculaNominas {
         "5.Actualizar todos los sueldos\n"+
         "6.Realizar copia de seguridad\n"+
         "0.Salir\n"+
-        "------------------------------\n"+
-        "Elige una opcion:");
+        "------------------------------\n");
         menuOpciones();
     }
 
     @SuppressWarnings("resource")
     private static void menuOpciones(){
-        int opcion;
-        try (Scanner sca = new Scanner(System.in)) {
-            opcion = sca.nextInt();
-        }
+        int opcion = 9;
         while(opcion!=0){
+            System.out.print("Elige una opcion: ");
+            opcion = new Scanner(System.in).nextInt();
         switch (opcion) {
-            case 1:
-                consultaDB("SELECT * FROM Empleados;");
-                break;
-            case 2:
+            case 1 -> consultaDB("SELECT * FROM Empleados;");
+            case 2 -> {
                 String Dni;
                 System.out.println("Dni del empleado: ");
                 Dni = new Scanner(System.in).nextLine();
 
                 consultaDB("SELECT * FROM Empleados where Dni like "+Dni+";");
-                break;
-            case 3:
-
-                consultaDB("UPDATE");
-                break;
-            case 4:
-                consultaDB("USER");
-                break;
-            case 5:
-                consultaDB("USER");
-                break;
-            case 6:
-                consultaDB("USER");
-                break;
-            default:
-                throw new AssertionError("No has seleccionado una opcion valida");
+                }
+            case 3 -> consultaDB("UPDATE");
+            case 4 -> consultaDB("USER");
+            case 5 -> consultaDB("USER");
+            case 6 -> consultaDB("USER");
+            default -> throw new AssertionError("No has seleccionado una opcion valida");
         }
         }
         System.out.println("Adios");
