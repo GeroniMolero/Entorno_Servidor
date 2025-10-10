@@ -1,0 +1,5 @@
+com\aprendec\conexion\Conexion.class
+com\aprendec\dao\ProductoDAO.class
+com\aprendec\model\Producto.class
+crud\java\Main.class
+com\aprendec\controller\ProductoController.class
