@@ -1,0 +1,6 @@
+com\conexion\Conexion.class
+com\controller\NominasController.class
+com\model\Persona.class
+com\exceptions\DatosNoCorrectosException.class
+com\model\Empleado.class
+com\model\Nomina.class
