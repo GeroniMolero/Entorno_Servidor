@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Probando Servlets</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	
+	<h2>1 - Reenviar una petición dentro de nuestro sitio</h2>
+	<form action="ForwardServlet" method="POST">
+		<label>Usuario: </label><input type="text" name="user" value=""/><br/>
+		<label>Contraseña: </label><input type="password" name="pass" value=""/><br/>
+		<p>Solo se permite la pareja: admin / 1234</p>
+		<input type="submit" value="Enviar"/>
+	</form>
+	<hr/>
+	<h2>2 - Redirigir a otro sitio</h2>
+	<form action="RedirectServlet" method="POST">
+		<label>Buscar en Google: </label><input type="text" name="query" value=""/><br/>
+		<input type="submit" value="Enviar"/>
+	</form>
+	
+	
+</body>
+</html>

@@ -1,0 +1,217 @@
+/****** ELEMENTOS GLOBALES ********/
+* {
+    padding: 0px;
+    margin: 0px;
+    font-family: Roboto;
+}
+.container {
+    width: 80%;
+    margin:auto;
+}
+
+/****** CABECERA ********/
+.header {
+    background-color: #222;
+    color: white;
+    padding: 20px;
+}
+
+.header .col-izq {
+    display: inline-block;
+    width: 48%;
+    text-align: left;
+    padding-left: 20px;
+}
+.header .col-der {
+    display: inline-block;
+    width: 48%;
+    text-align: right;
+}
+
+.header img {
+    display: inline-block;
+    vertical-align: middle;
+    height: 50px;
+}
+.header h1 {
+    display: inline-block;
+    vertical-align: middle;
+    padding-left: 20px;
+    font-size: 2.5em;
+}
+.header .col-der a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    margin-left: 10px;
+    border-radius: 9%;
+    font-size: 1.2em;
+    transition: 0.5s;
+}
+.header .col-der a:hover {
+    color: #222;
+    background-color: white;
+    font-size: 1.2em;
+}
+.col-der i {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/****** BARRA NAVEGACIÃ“N ********/
+.nav-bar {
+    text-align: center;  
+    padding: 20px;
+    background-color:#555;
+}
+
+.nav-bar a {
+    color: white;  
+    text-decoration: none;
+    text-align: center;
+    margin-right: 20px;  
+    padding: 8px;
+    border-radius: 9%;
+    font-size: 1.2em;
+    transition: 0.5s;
+}
+.nav-bar a:hover {
+    color: #555;  
+    background-color:white;
+}
+
+
+/****** PRINCIPAL ********/
+.main-container {
+    margin: 40px 0px 40px 0px;
+    margin: auto;
+    padding-top: 10px;
+}
+
+.main-content {  
+    display: inline-block;
+    width: 60%;
+    padding: 20px;
+    vertical-align: middle;
+    margin: 15px;
+}
+
+.main-content h1 {  
+    margin-bottom: 10px;
+}
+
+.main-content p {
+    text-align: justify;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.aside {
+    display: inline-block;   
+    width: 33%;
+    vertical-align: middle;
+}
+
+.aside img {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 10px 10px 20px;
+}
+
+/****** TABLA DE CLIENTE ********/
+.customer-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 600px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.customer-table thead tr {
+    background-color: #222;
+    color: #ffffff;
+    text-align: left;
+}
+
+.customer-table th,
+.customer-table td {
+    padding: 12px 15px;
+}
+
+.customer-table tbody tr {
+    border-bottom: 1px solid #222;
+}
+
+.customer-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.customer-table tbody tr:last-of-type {
+    border-bottom: 2px solid #222;
+}
+
+
+/****** FORMULARIO CLIENTE ********/
+.customer-form-line {
+	padding-right: 20px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.customer-form-line input {
+	min-width: 1000px;
+	min-height: 25px;
+}
+
+.customer-form-message {
+	color: #222;
+	font-weight: 800;
+	display:block;
+	margin-top: 20px;
+}
+
+/****** PIE DE PÁGINA ********/
+.footer {
+    margin-top: 60px;
+    color: white;
+}
+
+.footer .row1 {
+    background-color: #555;
+}
+
+.footer-col {
+    display: inline-block;
+    width: 45%;
+    padding: 20px;
+    text-align: center;
+}
+
+.footer-col a{
+    display: block;
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+    font-size: 1.3em;
+}
+
+.footer .row2 {
+    text-align: center;
+    background-color: #222;
+    padding: 35px;
+}
+
+.footer .row2 a {
+    color: white;
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 9%;
+    margin: 30px;
+    font-size: 1.2em;
+    transition: 0.5s;
+}
+.footer .row2 a:hover {
+    color: #222;  
+    background-color:white;
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="ISO-8859-1">
+	<title>Probando Servlets</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<h2>1 - Mi primer Servlet</h2>
+	<p>Pincha en el siguiente <a href="MiPrimerServlet">enlace</a> para ver si funciona</p>
+	<hr/>
+	
+	<h2>2 - Mensajes y Servlet</h2>
+	<form action="MensajesServlet" method="GET">
+		<label>Dime tu nombre: </label><input type="text" name="nombre" value=""/><br/>
+		<label>Dime tus apellidos: </label><input type="text" name="apellidos" value=""/><br/>
+		<input type="submit" value="Enviar"/>
+	</form>
+	<hr/>
+	
+	<h2>3 - Traductor de colores</h2>
+	<form action="ColorTranslatorServlet" method="GET">
+		<label>Dime un color en inglés: </label>
+		<input type="text" name="color" value=""/><br/>
+		<input type="submit" value="Enviar"/>
+	</form>
+	<hr/>
+</body>
+</html>
