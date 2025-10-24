@@ -63,7 +63,6 @@ public class EmpleadosDAO {
             resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                // Asegúrate de usar los índices correctos
                 e = new Empleado(
                         resultSet.getString(1),  // nombre
                         resultSet.getString(2),  // dni
@@ -91,10 +90,10 @@ public class EmpleadosDAO {
         try {
             connection = obtenerConexion();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, empleado.nombre); // Usamos atributos públicos directamente
-            statement.setString(2, String.valueOf(empleado.sexo)); // Sexo como char
-            statement.setInt(3, empleado.getCategoria()); // Llamamos al getter
-            statement.setInt(4, empleado.anyos); // Accedemos al atributo 'anyos'
+            statement.setString(1, empleado.nombre);
+            statement.setString(2, String.valueOf(empleado.sexo));
+            statement.setInt(3, empleado.getCategoria());
+            statement.setInt(4, empleado.anyos);
             statement.setString(5, empleado.dni);
 
             int filasAfectadas = statement.executeUpdate();
