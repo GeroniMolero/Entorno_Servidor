@@ -82,5 +82,22 @@ public class Empleado extends Persona{
     public void imprime(){
         System.out.println("Nombre: " + nombre + ", Dni: " + dni + ", Sexo: " + sexo + ", Categoria: " + categoria + ", Anyos trabajados: " + anyos);
     }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
+    public char getSexo() {
+        return sexo;
+    }
+
+    public int getAnyos() {
+        return anyos;
+    }
+
     
 }

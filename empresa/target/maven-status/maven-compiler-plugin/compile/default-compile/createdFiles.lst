@@ -1,6 +1,9 @@
+com\dao\NominasDAO.class
+com\model\Persona.class
 com\conexion\Conexion.class
 com\controller\NominasController.class
-com\model\Persona.class
 com\exceptions\DatosNoCorrectosException.class
+com\controller\EmpleadosController.class
+com\dao\EmpleadosDAO.class
 com\model\Empleado.class
 com\model\Nomina.class

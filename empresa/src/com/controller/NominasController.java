@@ -29,4 +29,3 @@ public class NominasController extends HttpServlet {
   // TODO Auto-generated constructor stub
  }
 }
-
