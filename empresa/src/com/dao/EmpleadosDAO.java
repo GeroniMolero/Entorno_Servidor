@@ -40,7 +40,7 @@ public class EmpleadosDAO {
     }
 
     // ===========================================================
-    // OBTENER UN EMPLEADO POR DNI (versión mejorada)
+    // OBTENER UN EMPLEADO POR DNI
     // ===========================================================
     public Empleado obtenerEmpleado(String dni) throws SQLException, DatosNoCorrectosException {
         if (dni == null || dni.trim().isEmpty()) {
@@ -51,7 +51,7 @@ public class EmpleadosDAO {
         Empleado empleado = null;
 
         try (Connection con = Conexion.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, dni);
             try (ResultSet rs = ps.executeQuery()) {
@@ -61,14 +61,12 @@ public class EmpleadosDAO {
             }
         }
 
-    // 🔹 Evita devolver null: lanza un error claro si no se encontró el empleado
-    if (empleado == null) {
-        throw new SQLException("No se encontró ningún empleado con el DNI: " + dni);
+        if (empleado == null) {
+            throw new SQLException("No se encontró ningún empleado con el DNI: " + dni);
+        }
+
+        return empleado;
     }
-
-    return empleado;
-}
-
 
     // ===========================================================
     // ACTUALIZAR UN EMPLEADO (usando HttpServletRequest)
@@ -86,14 +84,14 @@ public class EmpleadosDAO {
 
             try (PreparedStatement psEmp = con.prepareStatement(sqlEmpleado)) {
                 psEmp.setString(1, empleado.getNombre());
-                psEmp.setString(2, String.valueOf(empleado.getSexo()));
+                psEmp.setString(2, empleado.getSexo()); // ✅ ahora es String
                 psEmp.setInt(3, empleado.getCategoria());
                 psEmp.setInt(4, empleado.getAnyos());
                 psEmp.setString(5, empleado.getDni());
                 int filasActualizadas = psEmp.executeUpdate();
-        
+
                 if (filasActualizadas == 0) {
-                    throw new SQLException("Error: No se encontró ningún empleado con el DNI " + empleado.getDni() + " para actualizar.");
+                    throw new SQLException("No se encontró ningún empleado con el DNI " + empleado.getDni());
                 }
             }
 
@@ -110,7 +108,7 @@ public class EmpleadosDAO {
             con.commit();
             return true;
         } catch (SQLException ex) {
-            throw new SQLException("Error actualizando empleado: " + ex.getMessage());
+            throw new SQLException("Error actualizando empleado: " + ex.getMessage(), ex);
         }
     }
 
@@ -146,26 +144,21 @@ public class EmpleadosDAO {
     // ===========================================================
 
     /**
-     * Crea un objeto Empleado a partir de un ResultSet (versión segura)
+     * Crea un objeto Empleado a partir de un ResultSet
      */
     private Empleado mapEmpleado(ResultSet rs) throws SQLException, DatosNoCorrectosException {
         String sexoStr = rs.getString("sexo");
-        char sexoChar = ' '; // valor por defecto
-
-        if (sexoStr != null && !sexoStr.trim().isEmpty()) {
-            sexoChar = sexoStr.trim().charAt(0);
+        if (sexoStr == null) {
+            sexoStr = "";
         }
-
         return new Empleado(
                 rs.getString("nombre"),
                 rs.getString("dni"),
-                sexoChar,
+                sexoStr.trim(),
                 rs.getInt("categoria"),
                 rs.getInt("anyos")
         );
     }
-
-
 
     /**
      * Construye un objeto Empleado desde un HttpServletRequest
@@ -173,12 +166,12 @@ public class EmpleadosDAO {
     private Empleado buildEmpleadoDesdeRequest(HttpServletRequest request)
             throws DatosNoCorrectosException {
 
-        return new Empleado(
-                request.getParameter("nombre"),
-                request.getParameter("dni"),
-                request.getParameter("sexo").charAt(0),
-                Integer.parseInt(request.getParameter("categoria")),
-                Integer.parseInt(request.getParameter("anyos"))
-        );
+        String nombre = request.getParameter("nombre");
+        String dni = request.getParameter("dni");
+        String sexo = request.getParameter("sexo");
+        int categoria = Integer.parseInt(request.getParameter("categoria"));
+        int anyos = Integer.parseInt(request.getParameter("anyos"));
+
+        return new Empleado(nombre, dni, sexo, categoria, anyos);
     }
 }
