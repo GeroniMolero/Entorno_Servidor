@@ -1,32 +1,60 @@
-<%@ page language="java" contentType="text/html;charset=ISO-8859-1" pageEncoding="ISO-8859-1" isELIgnored="false"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
-<html>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <title>Lista de Empleados</title>
+    <meta charset="UTF-8">
+    <title>Detalle de Empleado</title>
+    <link rel="stylesheet" href="<c:url value='/styles/global.css'/>">
 </head>
 <body>
-<h2>Lista de Empleados</h2>
+    <header>
+        <h1>Detalle del Empleado</h1>
+    </header>
 
-<table border="1" cellpadding="5" cellspacing="0">
-    <tr>
-        <th>Nombre</th>
-        <th>DNI</th>
-        <th>Sexo</th>
-        <th>Categoria</th>
-        <th>Anios</th>
-        <th>Acciones</th>
-    </tr>
-    <tr>
-            <td>${e.nombre}</td>
-            <td>${e.dni}</td>
-            <td>${e.sexo}</td>
-            <td>${e.categoria}</td>
-            <td>${e.anyos}</td>
-    </tr>
-</table>
+    <main>
+        <section class="detalle-container">
+            <c:choose>
+                <c:when test="${not empty error}">
+                    <div class="error">${error}</div>
+                </c:when>
 
-<br>
-<a href="index.jsp">Volver al menu</a>
+                <c:when test="${not empty empleado}">
+                    <div class="detalle">
+                        <h2>${empleado.nombre}</h2>
+                        <p><strong>DNI:</strong> ${empleado.dni}</p>
+                        <p><strong>Sexo:</strong> ${empleado.sexo}</p>
+                        <p><strong>Categoría:</strong> ${empleado.categoria}</p>
+                        <p><strong>Años trabajados:</strong> ${empleado.anyos}</p>
+                    </div>
+
+                    <div class="acciones">
+                        <a href="<c:url value='/EmpleadosController'>
+                                    <c:param name='action' value='editar'/>
+                                    <c:param name='dni' value='${empleado.dni}'/>
+                                 </c:url>" class="btn-small">Editar</a>
+
+                        <a href="<c:url value='/NominasController'>
+                                    <c:param name='action' value='mostrarSalario'/>
+                                    <c:param name='dni' value='${empleado.dni}'/>
+                                 </c:url>" class="btn-small">Ver salario</a>
+
+                        <a href="<c:url value='/index.jsp'/>" class="btn">Volver</a>
+                    </div>
+                </c:when>
+
+                <c:otherwise>
+                    <p class="mensaje">No se encontró el empleado solicitado.</p>
+                    <div class="acciones">
+                        <a href="<c:url value='/index.jsp'/>" class="btn-secundario">Volver</a>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Gestión de Nóminas</p>
+    </footer>
 </body>
 </html>
