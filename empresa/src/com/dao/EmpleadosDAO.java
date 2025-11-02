@@ -5,158 +5,153 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 
 import com.conexion.Conexion;
 import com.exceptions.DatosNoCorrectosException;
 import com.model.Empleado;
 import com.model.Nomina;
 
+/**
+ * DAO mejorado: actúa como Business Delegate.
+ * Maneja la lógica de negocio y la interacción con la base de datos.
+ */
 public class EmpleadosDAO {
 
-    private Connection connection;
-    private PreparedStatement statement;
-
     // ===========================================================
-    // LISTAR EMPLEADOS
+    // LISTAR TODOS LOS EMPLEADOS
     // ===========================================================
     public List<Empleado> listar() throws SQLException, DatosNoCorrectosException {
-        List<Empleado> listaEmpleados = new ArrayList<>();
         String sql = "SELECT * FROM empleados";
-        ResultSet rs = null;
+        List<Empleado> lista = new ArrayList<>();
 
-        try {
-            connection = obtenerConexion();
-            statement = connection.prepareStatement(sql);
-            rs = statement.executeQuery();
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                Empleado e = new Empleado(
-                        rs.getString("nombre"),
-                        rs.getString("dni"),
-                        rs.getString("sexo").charAt(0),
-                        rs.getInt("categoria"),
-                        rs.getInt("anyos")
-                );
-                listaEmpleados.add(e);
+                lista.add(mapEmpleado(rs));
             }
-        } finally {
-            if (rs != null) rs.close();
-            if (statement != null) statement.close();
-            if (connection != null) connection.close();
         }
-
-        return listaEmpleados;
+        return lista;
     }
 
     // ===========================================================
-    // OBTENER EMPLEADO POR DNI
+    // OBTENER UN EMPLEADO POR DNI
     // ===========================================================
     public Empleado obtenerEmpleado(String dni) throws SQLException, DatosNoCorrectosException {
-        Empleado e = null;
         String sql = "SELECT * FROM empleados WHERE dni=?";
-        ResultSet rs = null;
+        Empleado e = null;
 
-        try {
-            connection = obtenerConexion();
-            statement = connection.prepareStatement(sql);
-            statement.setString(1, dni);
-            rs = statement.executeQuery();
-
-            if (rs.next()) {
-                e = new Empleado(
-                        rs.getString("nombre"),
-                        rs.getString("dni"),
-                        rs.getString("sexo").charAt(0),
-                        rs.getInt("categoria"),
-                        rs.getInt("anyos")
-                );
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, dni);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) e = mapEmpleado(rs);
             }
-        } finally {
-            if (rs != null) rs.close();
-            if (statement != null) statement.close();
-            if (connection != null) connection.close();
         }
-
         return e;
     }
 
     // ===========================================================
-    // ACTUALIZAR EMPLEADO Y SU SUELDO
+    // ACTUALIZAR UN EMPLEADO (usando HttpServletRequest)
     // ===========================================================
-    public boolean actualizarEmpleado(Empleado empleado) throws SQLException {
-        String sql = "UPDATE empleados SET nombre=?, sexo=?, categoria=?, anyos=? WHERE dni=?";
-        boolean estadoOperacion = false;
+    public boolean actualizarEmpleado(HttpServletRequest request)
+            throws SQLException, DatosNoCorrectosException {
 
-        try {
-            connection = obtenerConexion();
-            statement = connection.prepareStatement(sql);
-            statement.setString(1, empleado.getNombre());
-            statement.setString(2, String.valueOf(empleado.getSexo()));
-            statement.setInt(3, empleado.getCategoria());
-            statement.setInt(4, empleado.getAnyos());
-            statement.setString(5, empleado.getDni());
+        Empleado empleado = buildEmpleadoDesdeRequest(request);
 
-            int filasAfectadas = statement.executeUpdate();
+        String sqlEmpleado = "UPDATE empleados SET nombre=?, sexo=?, categoria=?, anyos=? WHERE dni=?";
+        String sqlNomina = "UPDATE nominas SET sueldo=? WHERE dni=?";
 
-            if (filasAfectadas > 0) {
-                // Recalcular el sueldo
-                Nomina n = new Nomina();
-                double nuevoSueldo = n.sueldo(empleado);
+        try (Connection con = Conexion.getConnection()) {
+            con.setAutoCommit(false);
 
-                sql = "UPDATE nominas SET sueldo=? WHERE dni=?";
-                statement = connection.prepareStatement(sql);
-                statement.setDouble(1, nuevoSueldo);
-                statement.setString(2, empleado.getDni());
-                statement.executeUpdate();
-
-                estadoOperacion = true;
+            try (PreparedStatement psEmp = con.prepareStatement(sqlEmpleado)) {
+                psEmp.setString(1, empleado.getNombre());
+                psEmp.setString(2, String.valueOf(empleado.getSexo()));
+                psEmp.setInt(3, empleado.getCategoria());
+                psEmp.setInt(4, empleado.getAnyos());
+                psEmp.setString(5, empleado.getDni());
+                psEmp.executeUpdate();
             }
-        } finally {
-            if (statement != null) statement.close();
-            if (connection != null) connection.close();
-        }
 
-        return estadoOperacion;
+            // Calcular sueldo
+            Nomina n = new Nomina();
+            double nuevoSueldo = n.sueldo(empleado);
+
+            try (PreparedStatement psNom = con.prepareStatement(sqlNomina)) {
+                psNom.setDouble(1, nuevoSueldo);
+                psNom.setString(2, empleado.getDni());
+                psNom.executeUpdate();
+            }
+
+            con.commit();
+            return true;
+        } catch (SQLException ex) {
+            throw new SQLException("Error actualizando empleado: " + ex.getMessage());
+        }
     }
 
     // ===========================================================
-    // BUSCAR POR CRITERIO (nombre, dni, etc.)
+    // BUSCAR EMPLEADOS POR CRITERIO
     // ===========================================================
-    public List<Empleado> buscarPorCriterio(String campo, String valor) throws SQLException, DatosNoCorrectosException {
-        List<Empleado> listaEmpleados = new ArrayList<>();
+    public List<Empleado> buscarPorCriterio(HttpServletRequest request)
+            throws SQLException, DatosNoCorrectosException {
+
+        String campo = request.getParameter("campo");
+        String valor = request.getParameter("valor");
+
+        List<String> camposValidos = Arrays.asList("nombre", "dni", "sexo", "categoria", "anyos");
+        if (!camposValidos.contains(campo)) {
+            throw new SQLException("Campo no válido: " + campo);
+        }
+
         String sql = "SELECT * FROM empleados WHERE " + campo + " LIKE ?";
-        ResultSet rs = null;
+        List<Empleado> lista = new ArrayList<>();
 
-        try {
-            connection = obtenerConexion();
-            statement = connection.prepareStatement(sql);
-            statement.setString(1, "%" + valor + "%");
-            rs = statement.executeQuery();
-
-            while (rs.next()) {
-                Empleado e = new Empleado(
-                        rs.getString("nombre"),
-                        rs.getString("dni"),
-                        rs.getString("sexo").charAt(0),
-                        rs.getInt("categoria"),
-                        rs.getInt("anyos")
-                );
-                listaEmpleados.add(e);
+        try (Connection con = Conexion.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + valor + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) lista.add(mapEmpleado(rs));
             }
-        } finally {
-            if (rs != null) rs.close();
-            if (statement != null) statement.close();
-            if (connection != null) connection.close();
         }
-
-        return listaEmpleados;
+        return lista;
     }
 
     // ===========================================================
-    // CONEXIÓN A BD
+    // MÉTODOS AUXILIARES (CONSTRUCCIÓN Y MAPEOS)
     // ===========================================================
-    private Connection obtenerConexion() throws SQLException {
-        return Conexion.getConnection();
+
+    /**
+     * Crea un objeto Empleado a partir de un ResultSet
+     */
+    private Empleado mapEmpleado(ResultSet rs) throws SQLException, DatosNoCorrectosException {
+        return new Empleado(
+                rs.getString("nombre"),
+                rs.getString("dni"),
+                rs.getString("sexo").charAt(0),
+                rs.getInt("categoria"),
+                rs.getInt("anyos")
+        );
+    }
+
+    /**
+     * Construye un objeto Empleado desde un HttpServletRequest
+     */
+    private Empleado buildEmpleadoDesdeRequest(HttpServletRequest request)
+            throws DatosNoCorrectosException {
+
+        return new Empleado(
+                request.getParameter("nombre"),
+                request.getParameter("dni"),
+                request.getParameter("sexo").charAt(0),
+                Integer.parseInt(request.getParameter("categoria")),
+                Integer.parseInt(request.getParameter("anyos"))
+        );
     }
 }

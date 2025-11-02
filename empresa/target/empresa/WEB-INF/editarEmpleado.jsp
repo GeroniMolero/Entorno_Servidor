@@ -24,7 +24,7 @@
                 </c:when>
 
                 <c:otherwise>
-                    <form action="<c:url value='/EmpleadosController'/>" method="get" class="form-dark">
+                    <form action="<c:url value='/EmpleadosController'/>" method="post" class="form-dark">
                         <input type="hidden" name="action" value="actualizar" />
                         <input type="hidden" name="dni" value="${empleado.dni}" />
 

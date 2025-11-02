@@ -1,16 +1,16 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de Nóminas</title>
+    <title>Gestión de Nóminas - Inicio</title>
     <link rel="stylesheet" href="<c:url value='/styles/global.css'/>">
 </head>
 <body>
-    <header class="header-main">
+    <header>
         <h1>Gestión de Nóminas</h1>
-        <p class="subtitle">Sistema de Empleados y Sueldos</p>
+        <p>Aplicación Web de gestión de empleados y nóminas</p>
     </header>
 
     <main>
@@ -20,16 +20,15 @@
 
                 <nav class="menu-links">
                     <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-menu">Ver todos los empleados</a>
-                    <a href="<c:url value='/EmpleadosController?action=formSalario'/>" class="btn-menu">Consultar salario</a>
-                    <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-menu">Modificar empleado</a>
-                    <a href="<c:url value='/NominasController?action=listarNominas'/>" class="btn-menu">Ver Nóminas</a>
+                    <a href="<c:url value='/NominasController?action=formSalario'/>" class="btn-menu">Consultar salario</a>
+                    <a href="<c:url value='/EmpleadosController?action=buscarForm'/>" class="btn-menu">Modificar empleado</a>
                 </nav>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>© 2025 Gestión de Nóminas — Proyecto JSP / Maven / Tomcat</p>
+        <p>© 2025 Gestión de Nóminas — Aplicación Web desarrollada por Gerónimo Molero Rodríguez | Java EE • MVC • MySQL</p>
     </footer>
 </body>
 </html>
