@@ -40,21 +40,35 @@ public class EmpleadosDAO {
     }
 
     // ===========================================================
-    // OBTENER UN EMPLEADO POR DNI
+    // OBTENER UN EMPLEADO POR DNI (versión mejorada)
     // ===========================================================
     public Empleado obtenerEmpleado(String dni) throws SQLException, DatosNoCorrectosException {
+        if (dni == null || dni.trim().isEmpty()) {
+            throw new SQLException("El DNI proporcionado es nulo o vacío.");
+        }
+
         String sql = "SELECT * FROM empleados WHERE dni=?";
-        Empleado e = null;
+        Empleado empleado = null;
 
         try (Connection con = Conexion.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+            PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setString(1, dni);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) e = mapEmpleado(rs);
+                if (rs.next()) {
+                    empleado = mapEmpleado(rs);
+                }
             }
         }
-        return e;
+
+    // 🔹 Evita devolver null: lanza un error claro si no se encontró el empleado
+    if (empleado == null) {
+        throw new SQLException("No se encontró ningún empleado con el DNI: " + dni);
     }
+
+    return empleado;
+}
+
 
     // ===========================================================
     // ACTUALIZAR UN EMPLEADO (usando HttpServletRequest)
@@ -76,7 +90,11 @@ public class EmpleadosDAO {
                 psEmp.setInt(3, empleado.getCategoria());
                 psEmp.setInt(4, empleado.getAnyos());
                 psEmp.setString(5, empleado.getDni());
-                psEmp.executeUpdate();
+                int filasActualizadas = psEmp.executeUpdate();
+        
+                if (filasActualizadas == 0) {
+                    throw new SQLException("Error: No se encontró ningún empleado con el DNI " + empleado.getDni() + " para actualizar.");
+                }
             }
 
             // Calcular sueldo
@@ -128,17 +146,26 @@ public class EmpleadosDAO {
     // ===========================================================
 
     /**
-     * Crea un objeto Empleado a partir de un ResultSet
+     * Crea un objeto Empleado a partir de un ResultSet (versión segura)
      */
     private Empleado mapEmpleado(ResultSet rs) throws SQLException, DatosNoCorrectosException {
+        String sexoStr = rs.getString("sexo");
+        char sexoChar = ' '; // valor por defecto
+
+        if (sexoStr != null && !sexoStr.trim().isEmpty()) {
+            sexoChar = sexoStr.trim().charAt(0);
+        }
+
         return new Empleado(
                 rs.getString("nombre"),
                 rs.getString("dni"),
-                rs.getString("sexo").charAt(0),
+                sexoChar,
                 rs.getInt("categoria"),
                 rs.getInt("anyos")
         );
     }
+
+
 
     /**
      * Construye un objeto Empleado desde un HttpServletRequest
