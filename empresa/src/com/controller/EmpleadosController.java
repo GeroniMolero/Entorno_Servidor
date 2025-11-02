@@ -18,17 +18,27 @@ public class EmpleadosController extends HttpServlet {
     private EmpleadosDAO dao;
 
     @Override
-    public void init() { dao = new EmpleadosDAO(); }
+    public void init() {
+        dao = new EmpleadosDAO();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
         String action = req.getParameter("action");
-        if (action == null) action = "listar";
+        if (action == null) {
+            action = "listar";
+        }
 
         try {
             switch (action) {
+                case "listar":
+                    List<Empleado> lista = dao.listar();
+                    req.setAttribute("listaEmpleados", lista);
+                    forward(req, res, "empleados.jsp");
+                    break;
+
                 case "buscarForm":
                     forward(req, res, "WEB-INF/buscarEmpleado.jsp");
                     break;
@@ -39,20 +49,42 @@ public class EmpleadosController extends HttpServlet {
                     break;
 
                 case "editar":
-                    req.setAttribute("empleado", dao.obtenerEmpleado(req.getParameter("dni")));
+                    String dni = req.getParameter("dni");
+                    if (dni == null || dni.trim().isEmpty()) {
+                        throw new IllegalArgumentException("El DNI del empleado no fue proporcionado para la edición.");
+                    }
+
+                    Empleado emp = dao.obtenerEmpleado(dni);
+                    if (emp == null) {
+                        req.setAttribute("error", "No se encontró el empleado con DNI: " + dni);
+                    } else {
+                        req.setAttribute("empleado", emp);
+                    }
+
                     forward(req, res, "WEB-INF/editarEmpleado.jsp");
                     break;
 
-                case "actualizar":
-                    dao.actualizarEmpleado(req);
-                    res.sendRedirect("EmpleadosController?action=listar");
-                    break;
-
                 default:
-                    List<Empleado> lista = dao.listar();
-                    req.setAttribute("listaEmpleados", lista);
-                    forward(req, res, "empleados.jsp");
+                    res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no reconocida: " + action);
                     break;
+            }
+        } catch (Exception e) {
+            manejarError(e, req, res);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+
+        String action = req.getParameter("action");
+
+        try {
+            if ("actualizar".equals(action)) {
+                dao.actualizarEmpleado(req);
+                res.sendRedirect("EmpleadosController?action=listar");
+            } else {
+                res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción POST no reconocida: " + action);
             }
         } catch (Exception e) {
             manejarError(e, req, res);

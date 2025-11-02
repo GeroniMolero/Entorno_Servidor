@@ -1,57 +1,61 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Resultados de búsqueda</title>
+    <title>Resultado de Búsqueda</title>
     <link rel="stylesheet" href="<c:url value='/styles/global.css'/>">
 </head>
 <body>
 <header>
-    <h1>Resultados de búsqueda</h1>
+    <h1>Resultado de Búsqueda de Empleados</h1>
 </header>
 
 <main>
     <section class="tabla-container">
-        <c:if test="${empty listaEmpleados}">
-            <p>No se encontraron empleados con los criterios indicados.</p>
-        </c:if>
 
-        <c:if test="${not empty listaEmpleados}">
-            <table class="tabla-dark">
-                <thead>
-                    <tr>
-                        <th>DNI</th>
-                        <th>Nombre</th>
-                        <th>Sexo</th>
-                        <th>Categoría</th>
-                        <th>Años</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:forEach var="e" items="${listaEmpleados}">
+        <c:choose>
+            <c:when test="${empty listaEmpleados}">
+                <p class="mensaje">No se encontraron empleados con los criterios de búsqueda.</p>
+            </c:when>
+
+            <c:otherwise>
+                <table class="tabla">
+                    <thead>
                         <tr>
-                            <td>${e.dni}</td>
-                            <td>${e.nombre}</td>
-                            <td>${e.sexo}</td>
-                            <td>${e.categoria}</td>
-                            <td>${e.anyos}</td>
-                            <td>
-                                <a href="<c:url value='/EmpleadosController?action=editar&dni=${e.dni}'/>" class="btn">Editar</a>
-                            </td>
+                            <th>Nombre</th>
+                            <th>DNI</th>
+                            <th>Sexo</th>
+                            <th>Categoría</th>
+                            <th>Años trabajados</th>
+                            <th>Acciones</th>
                         </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
-        </c:if>
-    </section>
+                    </thead>
+                    <tbody>
+                        <c:forEach var="empleado" items="${listaEmpleados}">
+                            <tr>
+                                <td>${empleado.nombre}</td>
+                                <td>${empleado.dni}</td>
+                                <td>${empleado.sexo}</td>
+                                <td>${empleado.categoria}</td>
+                                <td>${empleado.anyos}</td>
+                                <td>
+                                    <a class="btn-small" href="<c:url value='/EmpleadosController?action=editar&dni=${empleado.dni}'/>">Editar</a>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </tbody>
+                </table>
+            </c:otherwise>
+        </c:choose>
 
-    <div class="acciones">
-        <a href="<c:url value='/EmpleadosController?action=buscarForm'/>" class="btn-secundario">Nueva búsqueda</a>
-        <a href="<c:url value='/index.jsp'/>" class="btn-secundario">Volver al inicio</a>
-    </div>
+        <div class="acciones">
+            <a href="<c:url value='/EmpleadosController?action=buscarForm'/>" class="btn-secundario">Nueva búsqueda</a>
+            <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-secundario">Volver al listado</a>
+        </div>
+
+    </section>
 </main>
 
 <footer>
