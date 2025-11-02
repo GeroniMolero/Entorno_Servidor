@@ -12,6 +12,6 @@
         <input type="text" id="dni" name="dni" required />
         <input type="submit" value="Buscar" />
     </form>
-    <p><a href="${pageContext.request.contextPath}/index.jsp">Volver</a></p>
+    <p><a href="index.jsp">Volver</a></p>
 </body>
 </html>

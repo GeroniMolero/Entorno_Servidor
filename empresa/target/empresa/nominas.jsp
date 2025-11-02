@@ -8,7 +8,7 @@
 </head>
 <body>
     <h2>Listado de Nóminas</h2>
-    <a href="${pageContext.request.contextPath}/index.jsp">Volver</a>
+    <a href="index.jsp">Volver</a>
     <table>
         <thead>
             <tr><th>DNI</th><th>Sueldo (€)</th></tr>

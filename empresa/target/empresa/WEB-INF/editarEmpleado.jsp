@@ -12,7 +12,7 @@
         if (e == null) {
     %>
         <p>No se encontró el empleado.</p>
-        <p><a href="${pageContext.request.contextPath}/index.jsp">Volver</a></p>
+        <p><a href="../index.jsp">Volver</a></p>
     <%
         } else {
     %>

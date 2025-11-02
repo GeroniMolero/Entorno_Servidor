@@ -32,6 +32,6 @@
 </table>
 
 <br>
-<a href="index.jsp">Volver al menu</a>
+<a href="${pageContext.request.contextPath}/index.jsp">Volver</a>
 </body>
 </html>

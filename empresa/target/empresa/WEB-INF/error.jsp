@@ -7,6 +7,6 @@
 <body>
     <h2>Ocurrió un error</h2>
     <p>${error}</p>
-    <p><a href="${pageContext.request.contextPath}/index.jsp">Volver</a></p>
+    <p><a href="../index.jsp">Volver al menú</a></p>
 </body>
 </html>
