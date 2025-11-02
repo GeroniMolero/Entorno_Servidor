@@ -13,7 +13,14 @@
     </header>
 
     <main>
-        <section class="resultado-container">
+        <section class="resultado-container" 
+        style="width: 80%;
+                max-width: 700px;
+                margin: 40px auto;
+                background-color: #2c2c2c;
+                padding: 25px;
+                border-radius: 10px;
+                box-shadow: 0 0 10px #00000055;">
             <c:choose>
                 <c:when test="${not empty error}">
                     <div class="error">${error}</div>
