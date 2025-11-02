@@ -1,17 +1,36 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<html>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <title>Buscar salario</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>Consultar Salario</title>
+    <link rel="stylesheet" href="<c:url value='/styles/global.css'/>">
 </head>
 <body>
-    <h2>Buscar salario por DNI</h2>
-    <form action="EmpleadosController" method="get">
-        <input type="hidden" name="action" value="buscar" />
-        <label for="dni">DNI:</label>
-        <input type="text" id="dni" name="dni" required />
-        <input type="submit" value="Buscar" />
-    </form>
-    <p><a href="index.jsp">Volver</a></p>
+    <header>
+        <h1>Consultar Salario de un Empleado</h1>
+    </header>
+
+    <main>
+        <section class="form-container">
+            <form action="<c:url value='/NominasController'/>" method="get" class="form-dark">
+                <input type="hidden" name="action" value="mostrarSalario" />
+
+                <label for="dni">Introduce el DNI del empleado:</label>
+                <input type="text" id="dni" name="dni" required placeholder="Ej: 11111111A" maxlength="9">
+
+                <input type="submit" value="Consultar salario" class="btn">
+            </form>
+
+            <div class="acciones">
+                <a href="<c:url value='/index.jsp'/>" class="btn-secundario">Volver</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Gestión de Nóminas</p>
+    </footer>
 </body>
 </html>

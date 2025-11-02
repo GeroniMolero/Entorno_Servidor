@@ -13,36 +13,35 @@ import com.model.Empleado;
 import com.model.Nomina;
 
 public class EmpleadosDAO {
+
     private Connection connection;
     private PreparedStatement statement;
 
-    // Mostrar empleados
+    // ===========================================================
+    // LISTAR EMPLEADOS
+    // ===========================================================
     public List<Empleado> listar() throws SQLException, DatosNoCorrectosException {
-        ResultSet resultSet = null;
         List<Empleado> listaEmpleados = new ArrayList<>();
         String sql = "SELECT * FROM empleados";
+        ResultSet rs = null;
 
         try {
             connection = obtenerConexion();
             statement = connection.prepareStatement(sql);
-            resultSet = statement.executeQuery();
+            rs = statement.executeQuery();
 
-            while (resultSet.next()) {
-                // Aquí, los valores deben coincidir con el índice de las columnas de tu base de datos
-                // Asumimos que las columnas en la base de datos están en el mismo orden
+            while (rs.next()) {
                 Empleado e = new Empleado(
-                        resultSet.getString(1),  // nombre
-                        resultSet.getString(2),  // dni
-                        resultSet.getString(3).charAt(0), // sexo
-                        resultSet.getInt(4),    // categoria
-                        resultSet.getInt(5)     // anyos
+                        rs.getString("nombre"),
+                        rs.getString("dni"),
+                        rs.getString("sexo").charAt(0),
+                        rs.getInt("categoria"),
+                        rs.getInt("anyos")
                 );
                 listaEmpleados.add(e);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         } finally {
-            if (resultSet != null) resultSet.close();
+            if (rs != null) rs.close();
             if (statement != null) statement.close();
             if (connection != null) connection.close();
         }
@@ -50,31 +49,31 @@ public class EmpleadosDAO {
         return listaEmpleados;
     }
 
-    // Mostrar empleado por dni
+    // ===========================================================
+    // OBTENER EMPLEADO POR DNI
+    // ===========================================================
     public Empleado obtenerEmpleado(String dni) throws SQLException, DatosNoCorrectosException {
-        ResultSet resultSet = null;
         Empleado e = null;
         String sql = "SELECT * FROM empleados WHERE dni=?";
+        ResultSet rs = null;
 
         try {
             connection = obtenerConexion();
             statement = connection.prepareStatement(sql);
             statement.setString(1, dni);
-            resultSet = statement.executeQuery();
+            rs = statement.executeQuery();
 
-            if (resultSet.next()) {
+            if (rs.next()) {
                 e = new Empleado(
-                        resultSet.getString(1),  // nombre
-                        resultSet.getString(2),  // dni
-                        resultSet.getString(3).charAt(0), // sexo
-                        resultSet.getInt(4),    // categoria
-                        resultSet.getInt(5)     // anyos
+                        rs.getString("nombre"),
+                        rs.getString("dni"),
+                        rs.getString("sexo").charAt(0),
+                        rs.getInt("categoria"),
+                        rs.getInt("anyos")
                 );
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         } finally {
-            if (resultSet != null) resultSet.close();
+            if (rs != null) rs.close();
             if (statement != null) statement.close();
             if (connection != null) connection.close();
         }
@@ -82,36 +81,37 @@ public class EmpleadosDAO {
         return e;
     }
 
-    // Actualizar empleado y recalcular su sueldo
+    // ===========================================================
+    // ACTUALIZAR EMPLEADO Y SU SUELDO
+    // ===========================================================
     public boolean actualizarEmpleado(Empleado empleado) throws SQLException {
-        String sql = "UPDATE empleados SET nombre=?, sexo=?, categoria=?, antiguedad=? WHERE dni=?";
+        String sql = "UPDATE empleados SET nombre=?, sexo=?, categoria=?, anyos=? WHERE dni=?";
         boolean estadoOperacion = false;
 
         try {
             connection = obtenerConexion();
             statement = connection.prepareStatement(sql);
-            statement.setString(1, empleado.nombre);
-            statement.setString(2, String.valueOf(empleado.sexo));
+            statement.setString(1, empleado.getNombre());
+            statement.setString(2, String.valueOf(empleado.getSexo()));
             statement.setInt(3, empleado.getCategoria());
-            statement.setInt(4, empleado.anyos);
-            statement.setString(5, empleado.dni);
+            statement.setInt(4, empleado.getAnyos());
+            statement.setString(5, empleado.getDni());
 
             int filasAfectadas = statement.executeUpdate();
+
             if (filasAfectadas > 0) {
+                // Recalcular el sueldo
                 Nomina n = new Nomina();
                 double nuevoSueldo = n.sueldo(empleado);
 
                 sql = "UPDATE nominas SET sueldo=? WHERE dni=?";
                 statement = connection.prepareStatement(sql);
                 statement.setDouble(1, nuevoSueldo);
-                statement.setString(2, empleado.dni);
+                statement.setString(2, empleado.getDni());
                 statement.executeUpdate();
 
                 estadoOperacion = true;
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            estadoOperacion = false;
         } finally {
             if (statement != null) statement.close();
             if (connection != null) connection.close();
@@ -120,32 +120,32 @@ public class EmpleadosDAO {
         return estadoOperacion;
     }
 
-    // Buscar por criterio
+    // ===========================================================
+    // BUSCAR POR CRITERIO (nombre, dni, etc.)
+    // ===========================================================
     public List<Empleado> buscarPorCriterio(String campo, String valor) throws SQLException, DatosNoCorrectosException {
-        ResultSet resultSet = null;
         List<Empleado> listaEmpleados = new ArrayList<>();
         String sql = "SELECT * FROM empleados WHERE " + campo + " LIKE ?";
+        ResultSet rs = null;
 
         try {
             connection = obtenerConexion();
             statement = connection.prepareStatement(sql);
             statement.setString(1, "%" + valor + "%");
-            resultSet = statement.executeQuery();
+            rs = statement.executeQuery();
 
-            while (resultSet.next()) {
+            while (rs.next()) {
                 Empleado e = new Empleado(
-                        resultSet.getString(1),  // nombre
-                        resultSet.getString(2),  // dni
-                        resultSet.getString(3).charAt(0), // sexo
-                        resultSet.getInt(4),    // categoria
-                        resultSet.getInt(5)     // anyos
+                        rs.getString("nombre"),
+                        rs.getString("dni"),
+                        rs.getString("sexo").charAt(0),
+                        rs.getInt("categoria"),
+                        rs.getInt("anyos")
                 );
                 listaEmpleados.add(e);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         } finally {
-            if (resultSet != null) resultSet.close();
+            if (rs != null) rs.close();
             if (statement != null) statement.close();
             if (connection != null) connection.close();
         }
@@ -153,6 +153,9 @@ public class EmpleadosDAO {
         return listaEmpleados;
     }
 
+    // ===========================================================
+    // CONEXIÓN A BD
+    // ===========================================================
     private Connection obtenerConexion() throws SQLException {
         return Conexion.getConnection();
     }

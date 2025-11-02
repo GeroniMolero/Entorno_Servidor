@@ -1,45 +1,64 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="com.model.Empleado" %>
-<%@ page import="com.model.Nomina" %>
-<html>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html lang="es">
 <head>
+    <meta charset="UTF-8">
     <title>Editar Empleado</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="<c:url value='/styles/global.css'/>">
 </head>
 <body>
-    <%
-        Empleado e = (Empleado) request.getAttribute("empleado");
-        if (e == null) {
-    %>
-        <p>No se encontró el empleado.</p>
-        <p><a href="../index.jsp">Volver</a></p>
-    <%
-        } else {
-    %>
-        <h2>Editar datos de <%= e.getNombre() %></h2>
-        <form action="../EmpleadosController" method="get">
-            <input type="hidden" name="action" value="actualizar" />
-            <input type="hidden" name="dni" value="<%= e.getDni() %>" />
+    <header>
+        <h1>Editar Empleado</h1>
+    </header>
 
-            <label>Nombre:</label>
-            <input type="text" name="nombre" value="<%= e.getNombre() %>"><br><br>
+    <main>
+        <section class="form-container">
+            <c:choose>
+                <c:when test="${empty empleado}">
+                    <p class="mensaje">No se encontró el empleado especificado.</p>
+                    <div class="acciones">
+                        <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-secundario">Volver</a>
+                    </div>
+                </c:when>
 
-            <label>Sexo:</label>
-            <input type="text" name="sexo" value="<%= e.getSexo() %>"><br><br>
+                <c:otherwise>
+                    <form action="<c:url value='/EmpleadosController'/>" method="get" class="form-dark">
+                        <input type="hidden" name="action" value="actualizar" />
+                        <input type="hidden" name="dni" value="${empleado.dni}" />
 
-            <label>Categoría:</label>
-            <input type="number" name="categoria" value="<%= e.getCategoria() %>"><br><br>
+                        <label for="nombre">Nombre:</label>
+                        <input type="text" id="nombre" name="nombre" value="${empleado.nombre}" required>
 
-            <label>Años trabajados:</label>
-            <input type="number" name="anyos" value="<%= e.getAnyos() %>"><br><br>
+                        <label for="sexo">Sexo:</label>
+                        <input type="text" id="sexo" name="sexo" value="${empleado.sexo}" maxlength="1" required>
 
-            <p><b>Sueldo actual:</b> <%= new Nomina().sueldo(e) %> € (calculado automáticamente)</p>
+                        <label for="categoria">Categoría:</label>
+                        <input type="number" id="categoria" name="categoria" value="${empleado.categoria}" min="1" max="10" required>
 
-            <input type="submit" value="Guardar cambios" />
-        </form>
-        <p><a href="../EmpleadosController?action=listar">Volver</a></p>
-    <%
-        }
-    %>
+                        <label for="anyos">Años trabajados:</label>
+                        <input type="number" id="anyos" name="anyos" value="${empleado.anyos}" min="0" required>
+
+                        <c:if test="${not empty salario}">
+                            <p><b>Sueldo actual:</b> 
+                                <fmt:formatNumber value="${salario}" type="currency" currencySymbol="€" />
+                            </p>
+                        </c:if>
+
+                        <input type="submit" value="Guardar cambios" class="btn">
+                    </form>
+
+                    <div class="acciones">
+                        <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-secundario">Volver</a>
+                    </div>
+                </c:otherwise>
+            </c:choose>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Gestión de Nóminas</p>
+    </footer>
 </body>
 </html>

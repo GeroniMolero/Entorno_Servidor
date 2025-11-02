@@ -1,37 +1,61 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page import="com.model.Nomina" %>
-<%@ page import="java.util.List" %>
-<html>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <title>Listado de Nóminas</title>
-    <link rel="stylesheet" href="styles/style.css">
+    <meta charset="UTF-8">
+    <title>Nóminas de Empleados</title>
+    <link rel="stylesheet" href="<c:url value='/styles/global.css'/>">
 </head>
 <body>
-    <h2>Listado de Nóminas</h2>
-    <a href="index.jsp">Volver</a>
-    <table>
-        <thead>
-            <tr><th>DNI</th><th>Sueldo (€)</th></tr>
-        </thead>
-        <tbody>
-            <%
-                List<Nomina> listaNominas = (List<Nomina>) request.getAttribute("listaNominas");
-                if (listaNominas != null) {
-                    for (Nomina n : listaNominas) {
-            %>
-                        <tr>
-                            <td><%= n.getDni() %></td>
-                            <td><%= String.format("%.2f", n.getSueldo()) %></td>
-                        </tr>
-            <%
-                    }
-                } else {
-            %>
-                    <tr><td colspan="2">No hay nóminas registradas.</td></tr>
-            <%
-                }
-            %>
-        </tbody>
-    </table>
+    <header>
+        <h1>Nóminas de Empleados</h1>
+    </header>
+
+    <main>
+        <section class="tabla-container">
+            <c:choose>
+                <c:when test="${empty listaNominas}">
+                    <p class="mensaje">No se encontraron nóminas.</p>
+                </c:when>
+
+                <c:otherwise>
+                    <table class="tabla">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>DNI</th>
+                                <th>Categoría</th>
+                                <th>Años trabajados</th>
+                                <th>Salario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="n" items="${listaNominas}">
+                                <tr>
+                                    <td>${n.empleado.nombre}</td>
+                                    <td>${n.empleado.dni}</td>
+                                    <td>${n.empleado.categoria}</td>
+                                    <td>${n.empleado.anyos}</td>
+                                    <td>
+                                        <fmt:formatNumber value="${n.salario}" type="currency" currencySymbol="€" />
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                </c:otherwise>
+            </c:choose>
+
+            <div class="acciones">
+                <a href="<c:url value='/index.jsp'/>" class="btn-secundario">Volver al inicio</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Gestión de Nóminas</p>
+    </footer>
 </body>
 </html>
