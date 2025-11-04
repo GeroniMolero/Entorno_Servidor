@@ -49,7 +49,7 @@ public class NominasController extends HttpServlet {
                     listarNominas(request, response);
                     break;
                 default:
-                    request.getRequestDispatcher("salarioForm.jsp").forward(request, response);
+                    request.getRequestDispatcher("WEB-INF/salarioForm.jsp").forward(request, response);
                     break;
             }
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class NominasController extends HttpServlet {
             request.setAttribute("salario", salario);
         }
 
-        request.getRequestDispatcher("salarioResultado.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/salarioResultado.jsp").forward(request, response);
     }
 
     /**
@@ -119,7 +119,7 @@ public class NominasController extends HttpServlet {
         }
 
         request.setAttribute("listaNominas", listaNominas);
-        request.getRequestDispatcher("nominas.jsp").forward(request, response);
+        request.getRequestDispatcher("WEB-INF/nominas.jsp").forward(request, response);
     }
 
     @Override

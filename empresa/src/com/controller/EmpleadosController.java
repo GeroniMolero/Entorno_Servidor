@@ -36,7 +36,7 @@ public class EmpleadosController extends HttpServlet {
                 case "listar":
                     List<Empleado> lista = dao.listar();
                     req.setAttribute("listaEmpleados", lista);
-                    forward(req, res, "empleados.jsp");
+                    forward(req, res, "WEB-INF/empleados.jsp");
                     break;
 
                 case "buscarForm":
