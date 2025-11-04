@@ -17,18 +17,13 @@
         <th>Anios</th>
         <th>Acciones</th>
     </tr>
-    <c:forEach var="e" items="${listaEmpleados}">
-        <tr>
+    <tr>
             <td>${e.nombre}</td>
             <td>${e.dni}</td>
             <td>${e.sexo}</td>
             <td>${e.categoria}</td>
             <td>${e.anyos}</td>
-            <td>
-                <a href="EmpleadosController?action=editar&dni=${e.dni}">Editar</a>
-            </td>
-        </tr>
-    </c:forEach>
+    </tr>
 </table>
 
 <br>

@@ -13,8 +13,8 @@
         <th>Nombre</th>
         <th>DNI</th>
         <th>Sexo</th>
-        <th>Categoría</th>
-        <th>Años</th>
+        <th>Categoria</th>
+        <th>Anios</th>
         <th>Acciones</th>
     </tr>
     <c:forEach var="e" items="${listaEmpleados}">
@@ -32,6 +32,6 @@
 </table>
 
 <br>
-<a href="index.jsp">Volver al menú</a>
+<a href="index.jsp">Volver al menu</a>
 </body>
 </html>
