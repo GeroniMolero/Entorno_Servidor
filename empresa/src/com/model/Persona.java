@@ -1,48 +1,53 @@
 package com.model;
- 
+
 public class Persona {
 
-    public String nombre;
-    public String dni;
-    public char sexo;
+    private String nombre;
+    private String dni;
+    private String sexo;
 
-    /**
-     * Constructor que recoge todos los atributos de persona
-     * @param nombre String
-     * @param dni String
-     * @param sexo char
-     */
-    public Persona(String nombre, String dni, char sexo) {
+    // ===================== CONSTRUCTORES =====================
+    public Persona(String nombre, String dni, String sexo) {
         this.nombre = nombre;
         this.dni = dni;
         this.sexo = sexo;
     }
+
     public Persona() {
-    };
-    /**
-     * Constructor que recoge solo los atributos nombre y sexo
-     * @param nombre String
-     * @param sexo char
-     */
-    public Persona(String nombre, char sexo) {
+    }
+
+    public Persona(String nombre, String sexo) {
         this.nombre = nombre;
         this.sexo = sexo;
     }
 
-    /**
-     * Para modificar el valor del dni de una persona
-     * @param dni String
-     */
+    // ===================== GETTERS & SETTERS =====================
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getDni() {
+        return dni;
+    }
+
     public void setDni(String dni) {
         this.dni = dni;
     }
-    
-    /**
-     * Presenta por pantalla el nombre y el dni
-     * @param dni String
-     * @param nombre String
-     */
-    public void Imprime(String dni, String nombre){
+
+    public String getSexo() {
+        return sexo;
+    }
+
+    public void setSexo(String sexo) {
+        this.sexo = sexo;
+    }
+
+    // ===================== OTROS MÉTODOS =====================
+    public void imprime(String dni, String nombre) {
         System.out.println("Nombre: " + nombre + ", Dni: " + dni);
-    }   
+    }
 }

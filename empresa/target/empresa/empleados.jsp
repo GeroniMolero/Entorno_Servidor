@@ -1,37 +1,64 @@
-<%@ page language="java" contentType="text/html;charset=ISO-8859-1" pageEncoding="ISO-8859-1" isELIgnored="false"%>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
-    <title>Lista de Empleados</title>
+    <meta charset="UTF-8">
+    <title>Listado de Empleados</title>
+    <link rel="stylesheet" href="<c:url value='/styles/global.css'/>">
 </head>
 <body>
-<h2>Lista de Empleados</h2>
+    <header>
+        <h1>Listado de Empleados</h1>
+    </header>
 
-<table border="1" cellpadding="5" cellspacing="0">
-    <tr>
-        <th>Nombre</th>
-        <th>DNI</th>
-        <th>Sexo</th>
-        <th>Categoria</th>
-        <th>Anios</th>
-        <th>Acciones</th>
-    </tr>
-    <c:forEach var="e" items="${listaEmpleados}">
-        <tr>
-            <td>${e.nombre}</td>
-            <td>${e.dni}</td>
-            <td>${e.sexo}</td>
-            <td>${e.categoria}</td>
-            <td>${e.anyos}</td>
-            <td>
-                <a href="EmpleadosController?action=editar&dni=${e.dni}">Editar</a>
-            </td>
-        </tr>
-    </c:forEach>
-</table>
+    <main>
+        <section class="tabla-container">
+            <c:choose>
+                <c:when test="${empty listaEmpleados}">
+                    <p class="mensaje">No hay empleados registrados.</p>
+                </c:when>
 
-<br>
-<a href="index.jsp">Volver al menu</a>
+                <c:otherwise>
+                    <table class="tabla">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>DNI</th>
+                                <th>Sexo</th>
+                                <th>Categoría</th>
+                                <th>Años trabajados</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="empleado" items="${listaEmpleados}">
+                                <tr>
+                                <td>${empleado.nombre}</td>
+                                <td>${empleado.dni}</td>
+                                <td>${empleado.sexo}</td>
+                                <td>${empleado.categoria}</td>
+                                <td>${empleado.anyos}</td>
+                                <td>
+                                    <a class="btn-small" href="<c:url value='/EmpleadosController?action=editar&dni=${empleado.dni}'/>">Editar</a>
+                                    <a class="btn-small" href="<c:url value='/NominasController?dni=${empleado.dni}&action=mostrarSalario'/>">Ver salario</a>
+                                </td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+
+                    </table>
+                </c:otherwise>
+            </c:choose>
+
+            <div class="acciones">
+                <a href="<c:url value='/index.jsp'/>" class="btn-secundario">Volver al inicio</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>© 2025 Gestión de Nóminas</p>
+    </footer>
 </body>
 </html>

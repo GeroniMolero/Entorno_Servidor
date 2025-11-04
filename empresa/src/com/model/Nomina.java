@@ -11,7 +11,7 @@ public class Nomina {
      */
     public double sueldo(Empleado e) {
         double sueldo = 0;
-        sueldo = SUELDO_BASE[e.getCategoria() - 1] + (5000 * e.anyos);
+        sueldo = SUELDO_BASE[e.getCategoria() - 1] + (5000 * e.getAnyos());
         return sueldo;
     }
 }

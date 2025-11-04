@@ -1,11 +1,6 @@
 package com.controller;
 
-import com.dao.EmpleadosDAO;
-import com.exceptions.DatosNoCorrectosException;
-import com.model.Empleado;
-
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -14,99 +9,97 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.dao.EmpleadosDAO;
+import com.model.Empleado;
+
 @WebServlet("/EmpleadosController")
 public class EmpleadosController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private EmpleadosDAO empleadosDAO;
+    private EmpleadosDAO dao;
 
     @Override
-    public void init() throws ServletException {
-        empleadosDAO = new EmpleadosDAO();
+    public void init() {
+        dao = new EmpleadosDAO();
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
 
-        String action = request.getParameter("action");
+        String action = req.getParameter("action");
         if (action == null) {
-            action = "listar"; // Acción por defecto
+            action = "listar";
         }
 
         try {
             switch (action) {
-                case "buscar":
-                    buscarEmpleado(request, response);
+                case "listar":
+                    List<Empleado> lista = dao.listar();
+                    req.setAttribute("listaEmpleados", lista);
+                    forward(req, res, "empleados.jsp");
                     break;
+
+                case "buscarForm":
+                    forward(req, res, "WEB-INF/buscarEmpleado.jsp");
+                    break;
+
+                case "buscarResultado":
+                    req.setAttribute("listaEmpleados", dao.buscarPorCriterio(req));
+                    forward(req, res, "WEB-INF/resultadoBusqueda.jsp");
+                    break;
+
                 case "editar":
-                    mostrarFormularioEditar(request, response);
+                    String dni = req.getParameter("dni");
+                    if (dni == null || dni.trim().isEmpty()) {
+                        throw new IllegalArgumentException("El DNI del empleado no fue proporcionado para la edición.");
+                    }
+
+                    Empleado emp = dao.obtenerEmpleado(dni);
+                    if (emp == null) {
+                        req.setAttribute("error", "No se encontró el empleado con DNI: " + dni);
+                    } else {
+                        req.setAttribute("empleado", emp);
+                    }
+
+                    forward(req, res, "WEB-INF/editarEmpleado.jsp");
                     break;
-                case "actualizar":
-                    actualizarEmpleado(request, response);
-                    break;
+
                 default:
-                    listarEmpleados(request, response);
+                    res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción no reconocida: " + action);
                     break;
             }
-        } catch (SQLException | DatosNoCorrectosException e) {
-            e.printStackTrace();
-            request.setAttribute("error", e.getMessage());
-            request.getRequestDispatcher("error.jsp").forward(request, response);
+        } catch (Exception e) {
+            manejarError(e, req, res);
         }
-    }
-
-    // ==============================
-    //   MÉTODOS DE ACCIÓN
-    // ==============================
-
-    private void listarEmpleados(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, ServletException, IOException, DatosNoCorrectosException {
-        List<Empleado> lista = empleadosDAO.listar();
-        request.setAttribute("listaEmpleados", lista);
-        request.getRequestDispatcher("empleados.jsp").forward(request, response);
-    }
-
-    private void buscarEmpleado(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, ServletException, IOException, DatosNoCorrectosException {
-        String dni = request.getParameter("dni");
-        Empleado empleado = empleadosDAO.obtenerEmpleado(dni);
-
-        if (empleado != null) {
-            request.setAttribute("empleado", empleado);
-            request.getRequestDispatcher("detalleEmpleado.jsp").forward(request, response);
-        } else {
-            request.setAttribute("mensaje", "Empleado no encontrado");
-            request.getRequestDispatcher("error.jsp").forward(request, response);
-        }
-    }
-
-    private void mostrarFormularioEditar(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, ServletException, IOException, DatosNoCorrectosException {
-        String dni = request.getParameter("dni");
-        Empleado empleado = empleadosDAO.obtenerEmpleado(dni);
-        request.setAttribute("empleado", empleado);
-        request.getRequestDispatcher("editarEmpleado.jsp").forward(request, response);
-    }
-
-    private void actualizarEmpleado(HttpServletRequest request, HttpServletResponse response)
-            throws SQLException, IOException, DatosNoCorrectosException {
-        // Recuperar parámetros del formulario
-        String nombre = request.getParameter("nombre");
-        String dni = request.getParameter("dni");
-        char sexo = request.getParameter("sexo").charAt(0);
-        int categoria = Integer.parseInt(request.getParameter("categoria"));
-        int anyos = Integer.parseInt(request.getParameter("anyos"));
-
-        // Crear objeto empleado y actualizar
-        Empleado empleado = new Empleado(nombre, dni, sexo, categoria, anyos);
-        empleadosDAO.actualizarEmpleado(empleado);
-
-        response.sendRedirect("EmpleadosController?action=listar");
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-        doGet(request, response);
+
+        String action = req.getParameter("action");
+
+        try {
+            if ("actualizar".equals(action)) {
+                dao.actualizarEmpleado(req);
+                res.sendRedirect("EmpleadosController?action=listar");
+            } else {
+                res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción POST no reconocida: " + action);
+            }
+        } catch (Exception e) {
+            manejarError(e, req, res);
+        }
+    }
+
+    private void forward(HttpServletRequest req, HttpServletResponse res, String ruta)
+            throws ServletException, IOException {
+        req.getRequestDispatcher(ruta).forward(req, res);
+    }
+
+    private void manejarError(Exception e, HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        e.printStackTrace();
+        req.setAttribute("error", e.getMessage());
+        req.getRequestDispatcher("WEB-INF/error.jsp").forward(req, res);
     }
 }
