@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.util.ErrorHandler;
+
 /**
  * Patrón Front Controller - Punto único de entrada para todas las peticiones.
  * Centraliza el enrutamiento hacia los controladores específicos (EmpleadosController o NominasController).
@@ -73,7 +75,7 @@ public class FrontController extends HttpServlet {
             
         } catch (Exception e) {
             log("Error en FrontController: " + e.getMessage(), e);
-            manejarError(e, request, response);
+            ErrorHandler.handleError(e, request, response, getServletContext());
         }
     }
     
@@ -83,81 +85,6 @@ public class FrontController extends HttpServlet {
     private void redirigirAHome(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/index.jsp").forward(request, response);
-    }
-    
-    /**
-     * Manejo centralizado de errores con sanitización según entorno
-     */
-    private void manejarError(Exception e, HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        String environment = getServletContext().getInitParameter("app.environment");
-        boolean isDevelopment = "development".equals(environment);
-        
-        // Sanitizar mensaje para usuario final
-        String userMessage = sanitizeErrorMessage(e.getMessage());
-        request.setAttribute("error", userMessage);
-        
-        // Solo en desarrollo: exponer detalles técnicos
-        if (isDevelopment) {
-            request.setAttribute("errorType", e.getClass().getSimpleName());
-            request.setAttribute("errorStackTrace", getStackTraceAsString(e));
-        }
-        
-        // Siempre loggear el error completo para administradores
-        log("Error en aplicación: " + e.getMessage(), e);
-        
-        request.getRequestDispatcher("/WEB-INF/error.jsp").forward(request, response);
-    }
-    
-    /**
-     * Sanitiza mensajes de error para evitar exponer información sensible.
-     * Permite mensajes de negocio pero oculta detalles técnicos (SQL, rutas, etc.)
-     */
-    private String sanitizeErrorMessage(String message) {
-        if (message == null || message.trim().isEmpty()) {
-            return "Se ha producido un error inesperado.";
-        }
-        
-        // Lista blanca: mensajes de negocio permitidos
-        String lowerMessage = message.toLowerCase();
-        if (lowerMessage.contains("dni") || 
-            lowerMessage.contains("empleado") || 
-            lowerMessage.contains("nómina") ||
-            lowerMessage.contains("nomina") ||
-            lowerMessage.contains("categoría") ||
-            lowerMessage.contains("años")) {
-            return message;
-        }
-        
-        // Lista negra: ocultar mensajes técnicos
-        if (lowerMessage.contains("sql") || 
-            lowerMessage.contains("connection") || 
-            lowerMessage.contains("database") ||
-            lowerMessage.contains("table") || 
-            lowerMessage.contains("column") ||
-            lowerMessage.contains("jdbc") ||
-            lowerMessage.contains("exception") ||
-            lowerMessage.contains("null pointer") ||
-            lowerMessage.contains("class") ||
-            lowerMessage.contains("stack")) {
-            return "Error al procesar la solicitud. Por favor, contacte al administrador del sistema.";
-        }
-        
-        // Mensaje genérico para otros casos
-        return "Se ha producido un error. Por favor, inténtelo de nuevo.";
-    }
-    
-    /**
-     * Convierte el stack trace en String para mostrar en la página de error
-     */
-    private String getStackTraceAsString(Exception e) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(e.toString()).append("\n");
-        for (StackTraceElement element : e.getStackTrace()) {
-            sb.append("\tat ").append(element.toString()).append("\n");
-        }
-        return sb.toString();
     }
     
     @Override
