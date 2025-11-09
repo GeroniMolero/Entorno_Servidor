@@ -491,11 +491,11 @@ Usuario ve: mensaje completo + stack trace en desplegable
 ```
 
 **Beneficios**:
-- ✅ No expone estructura de base de datos
-- ✅ No revela rutas de archivos del servidor
-- ✅ No muestra nombres de clases internas
-- ✅ Logs del servidor siempre conservan error completo para administradores
-- ✅ En desarrollo: debugging fácil con stack traces visibles
+- No expone estructura de base de datos
+- No revela rutas de archivos del servidor
+- No muestra nombres de clases internas
+- Logs del servidor siempre conservan error completo para administradores
+- En desarrollo: debugging fácil con stack traces visibles
 
 #### 2. Sesiones seguras (solo cookies)
 
@@ -515,9 +515,9 @@ Usuario ve: mensaje completo + stack trace en desplegable
 - Si cookies están deshabilitadas: no hay sesión (más seguro que exponer ID en URL)
 
 **Beneficios**:
-- ✅ URLs limpias y compartibles sin riesgo de secuestro de sesión
-- ✅ Session ID no queda en historiales del navegador
-- ✅ Session ID no aparece en logs de proxies/analíticas
+- URLs limpias y compartibles sin riesgo de secuestro de sesión
+- Session ID no queda en historiales del navegador
+- Session ID no aparece en logs de proxies/analíticas
 
 #### 3. Protección de datos personales (POST en acciones sensibles)
 
@@ -548,6 +548,39 @@ Las acciones que manejan DNI u otros datos personales usan **POST** en lugar de 
 | **Uso recomendado** | Local, debugging | Servidores públicos |
 
 **Cambiar de modo**: Editar `web.xml` → `<param-value>production</param-value>` → Recompilar (`mvn package`)
+
+### Clase utilitaria ErrorHandler
+
+Para evitar duplicación de código, toda la lógica de sanitización y manejo de errores está centralizada en **`com.util.ErrorHandler`**:
+
+**Métodos disponibles**:
+
+```java
+// Sanitizar mensaje sin forward (útil para logging o validaciones)
+String mensaje = ErrorHandler.sanitizeErrorMessage(exception.getMessage());
+
+// Manejo completo con modo development/production (usado en FrontController)
+ErrorHandler.handleError(e, request, response, getServletContext());
+
+// Manejo simplificado sin diferenciación de entorno (otros controladores)
+ErrorHandler.handleErrorSimple(e, request, response);
+
+// Obtener stack trace como String (para logging)
+String stackTrace = ErrorHandler.getStackTraceAsString(exception);
+```
+
+**Ventajas de la centralización**:
+- ✅ DRY: Lógica de sanitización en un solo lugar
+- ✅ Mantenibilidad: Cambios en reglas de sanitización solo requieren modificar `ErrorHandler`
+- ✅ Reutilización: Cualquier clase puede usar los métodos estáticos
+- ✅ Testing: Fácil probar unitariamente sin instanciar servlets
+- ✅ Controladores más ligeros: Solo orquestan, no gestionan detalles de errores
+
+**Reglas de sanitización implementadas**:
+- **Lista blanca** (se permiten): dni, empleado, nómina, categoría, salario, años
+- **Lista negra** (se bloquean): sql, connection, database, table, column, jdbc, exception, nullpointer, class, stack
+
+---
 
 ### Buenas prácticas adicionales recomendadas
 
@@ -593,11 +626,13 @@ empresa/
 │       │       │   ├── Persona.java          # Clase padre
 │       │       │   ├── Empleado.java         # Modelo empleado
 │       │       │   └── Nomina.java           # Lógica cálculo salario
-│       │       └── service/
-│       │           ├── IEmpleadoService.java # Interfaz servicio empleados
-│       │           ├── INominaService.java   # Interfaz servicio nóminas
-│       │           ├── EmpleadoService.java  # Implementación
-│       │           └── NominaService.java    # Implementación
+│       │       ├── service/
+│       │       │   ├── IEmpleadoService.java # Interfaz servicio empleados
+│       │       │   ├── INominaService.java   # Interfaz servicio nóminas
+│       │       │   ├── EmpleadoService.java  # Implementación
+│       │       │   └── NominaService.java    # Implementación
+│       │       └── util/
+│       │           └── ErrorHandler.java     # Utilidad manejo errores centralizado
 │       ├── resources/
 │       │   └── application.properties        # Config externalizada (BD)
 │       └── webapp/
