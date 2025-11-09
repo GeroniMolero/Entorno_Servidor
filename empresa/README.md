@@ -379,7 +379,7 @@ public void testConsultarSalario() {
 
 2. Usuario introduce DNI → Submit
 
-3. GET /empresa/app/nominas?action=consultarSalario&dni=12345678A
+3. POST /empresa/app/nominas (action=consultarSalario, dni=12345678A)
 
 4. NominasController.consultarSalario()
    - Invoca nominaService.consultarSalarioEmpleado(dni)
@@ -430,12 +430,29 @@ CREATE TABLE nominas (
 | **Página inicio** | GET | `/empresa/` | - |
 | **Listar empleados** | GET | `/app/empleados` | `action=listar` |
 | **Buscar empleados (form)** | GET | `/app/empleados` | `action=buscarForm` |
-| **Buscar empleados (resultado)** | GET | `/app/empleados` | `action=buscarResultado`, `campo`, `valor` |
-| **Editar empleado (form)** | GET | `/app/empleados` | `action=editar`, `dni` |
+| **Buscar empleados (resultado)** | POST | `/app/empleados` | `action=buscarResultado`, `campo`, `valor` |
+| **Editar empleado (form)** | POST | `/app/empleados` | `action=editar`, `dni` |
 | **Actualizar empleado** | POST | `/app/empleados` | `action=actualizar` + campos formulario |
 | **Form consultar salario** | GET | `/app/nominas` | `action=formularioSalario` |
-| **Consultar salario** | GET | `/app/nominas` | `action=consultarSalario`, `dni` |
+| **Consultar salario** | POST | `/app/nominas` | `action=consultarSalario`, `dni` |
 | **Listar nóminas** | GET | `/app/nominas` | `action=listarNominas` |
+
+> Nota: Las acciones sensibles que incluyen DNI u otros criterios de búsqueda ahora usan POST para no exponer datos en la URL.
+
+---
+
+## Seguridad de rutas (GET vs POST)
+
+Para mejorar la privacidad de los usuarios y evitar que datos personales queden expuestos en URLs, historiales del navegador, logs de proxies o analíticas, se han realizado estos cambios:
+
+- Consultar salario: de GET a POST (`/app/nominas`, action=consultarSalario, dni)
+- Buscar empleados (resultado): de GET a POST (`/app/empleados`, action=buscarResultado, campo, valor)
+- Editar empleado (form): de GET a POST (`/app/empleados`, action=editar, dni)
+
+Implicaciones prácticas:
+- Los enlaces que antes eran anchors (a href) han sido reemplazados por formularios con método POST.
+- Los formularios incluyen campos ocultos para action y, cuando aplique, dni/campo/valor.
+- No cambia el flujo de usuario ni los JSP; solo el método HTTP con el que se envían los datos.
 
 ---
 
