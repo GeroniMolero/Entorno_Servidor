@@ -40,7 +40,7 @@
 
             <div class="acciones">
                 <a href="<c:url value='/index.jsp'/>" class="btn-secundario">Volver al inicio</a>
-                <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-secundario">Ver empleados</a>
+                <a href="<c:url value='/app/empleados?action=listar'/>" class="btn-secundario">Ver empleados</a>
             </div>
         </section>
     </main>

@@ -29,13 +29,13 @@
                     </div>
 
                     <div class="acciones">
-                        <a href="<c:url value='/EmpleadosController'>
+                        <a href="<c:url value='/app/empleados'>
                                     <c:param name='action' value='editar'/>
                                     <c:param name='dni' value='${empleado.dni}'/>
                                  </c:url>" class="btn-small">Editar</a>
 
-                        <a href="<c:url value='/NominasController'>
-                                    <c:param name='action' value='mostrarSalario'/>
+                        <a href="<c:url value='/app/nominas'>
+                                    <c:param name='action' value='consultarSalario'/>
                                     <c:param name='dni' value='${empleado.dni}'/>
                                  </c:url>" class="btn-small">Ver salario</a>
 
