@@ -50,11 +50,6 @@ public class EmpleadosController extends HttpServlet {
                     forward(req, res, "WEB-INF/buscarEmpleado.jsp");
                     break;
 
-                case "buscarResultado":
-                    req.setAttribute("listaEmpleados", empleadoService.buscarEmpleadosPorCriterio(req));
-                    forward(req, res, "WEB-INF/resultadoBusqueda.jsp");
-                    break;
-
                 case "editar":
                     String dni = req.getParameter("dni");
                     if (dni == null || dni.trim().isEmpty()) {
@@ -90,6 +85,9 @@ public class EmpleadosController extends HttpServlet {
             if ("actualizar".equals(action)) {
                 empleadoService.actualizarEmpleado(req);
                 res.sendRedirect(req.getContextPath() + "/app/empleados?action=listar");
+            } else if ("buscarResultado".equals(action)) {
+                req.setAttribute("listaEmpleados", empleadoService.buscarEmpleadosPorCriterio(req));
+                forward(req, res, "WEB-INF/resultadoBusqueda.jsp");
             } else {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción POST no reconocida: " + action);
             }
