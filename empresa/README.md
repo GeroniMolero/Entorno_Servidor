@@ -588,6 +588,24 @@ String stackTrace = ErrorHandler.getStackTraceAsString(exception);
 
 ---
 
+### Salida segura en vistas (XSS)
+
+Para prevenir Cross-Site Scripting, todas las variables renderizadas en JSP usan **`<c:out>`** (JSTL), que aplica `escapeXml=true` por defecto. Esto evita que contenido inyectado se interprete como HTML/JS.
+
+Recomendaciones:
+- No imprimir `${variable}` directamente en el HTML. Usa `<c:out value="${variable}"/>`.
+- En atributos HTML (`value=`, `title=`, etc.), también usar `<c:out>`.
+- En campos ocultos (`<input type="hidden">`), escapar el valor con `<c:out>`.
+- Si necesitas permitir HTML controlado, valida/whitelistea previamente en backend y documenta el motivo.
+
+Checklist para contribuciones:
+- [ ] Salidas en `<td>`, `<h1..h6>`, `<p>`: `<c:out>`
+- [ ] Atributos de inputs (`value`): `<c:out>`
+- [ ] Campos `hidden`: `<c:out>`
+- [ ] Mensajes de error al usuario: pasan por `ErrorHandler.sanitizeErrorMessage()` + `<c:out>`
+
+---
+
 ### Buenas prácticas adicionales recomendadas
 
 Para entornos de producción críticos:
