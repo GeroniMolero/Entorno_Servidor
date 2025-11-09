@@ -63,7 +63,7 @@
     <section class="form-container">
         <!-- Mostrar error si no se cargó el empleado -->
         <c:if test="${empty empleado}">
-            <p class="error"> No se pudo cargar el empleado. Verifique el DNI.</p>
+            <p class="error">No se pudo cargar el empleado. Verifique el DNI.</p>
             <a href="<c:url value='/app/empleados?action=listar'/>" class="btn-secundario">Volver</a>
         </c:if>
 
@@ -73,11 +73,11 @@
 
                 <!-- DNI -->
                 <label for="dni">DNI:</label>
-                <input type="text" id="dni" name="dni" value="${empleado.dni}" readonly>
+                <input type="text" id="dni" name="dni" value="<c:out value='${empleado.dni}'/>" readonly>
 
                 <!-- Nombre -->
                 <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" value="${empleado.nombre}" required>
+                <input type="text" id="nombre" name="nombre" value="<c:out value='${empleado.nombre}'/>" required>
 
                 <!-- Sexo -->
                 <label for="sexo">Sexo:</label>
