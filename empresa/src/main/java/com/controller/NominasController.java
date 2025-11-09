@@ -50,9 +50,7 @@ public class NominasController extends HttpServlet {
                     break;
             }
         } catch (Exception e) {
-            // Log sencillo. En producción usar un logger.
-            request.setAttribute("error", e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/error.jsp").forward(request, response);
+            manejarError(e, request, response);
         }
     }
 
@@ -92,8 +90,54 @@ public class NominasController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción POST no reconocida: " + action);
             }
         } catch (Exception e) {
-            request.setAttribute("error", e.getMessage());
-            request.getRequestDispatcher("/WEB-INF/error.jsp").forward(request, response);
+            manejarError(e, request, response);
         }
+    }
+
+    private void manejarError(Exception e, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Sanitizar mensaje para evitar exponer información técnica
+        String userMessage = sanitizeErrorMessage(e.getMessage());
+        request.setAttribute("error", userMessage);
+        request.getRequestDispatcher("/WEB-INF/error.jsp").forward(request, response);
+    }
+
+    /**
+     * Sanitiza mensajes de error para evitar exponer información sensible.
+     * Permite mensajes de negocio pero oculta detalles técnicos (SQL, rutas, etc.)
+     */
+    private String sanitizeErrorMessage(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            return "Se ha producido un error inesperado.";
+        }
+        
+        // Lista blanca: mensajes de negocio permitidos
+        String lowerMessage = message.toLowerCase();
+        if (lowerMessage.contains("dni") || 
+            lowerMessage.contains("empleado") || 
+            lowerMessage.contains("nómina") ||
+            lowerMessage.contains("nomina") ||
+            lowerMessage.contains("categoría") ||
+            lowerMessage.contains("salario") ||
+            lowerMessage.contains("años")) {
+            return message;
+        }
+        
+        // Lista negra: ocultar mensajes técnicos
+        if (lowerMessage.contains("sql") || 
+            lowerMessage.contains("connection") || 
+            lowerMessage.contains("database") ||
+            lowerMessage.contains("table") || 
+            lowerMessage.contains("column") ||
+            lowerMessage.contains("jdbc") ||
+            lowerMessage.contains("exception") ||
+            lowerMessage.contains("null pointer") ||
+            lowerMessage.contains("class") ||
+            lowerMessage.contains("stack")) {
+            return "Error al procesar la solicitud. Por favor, contacte al administrador del sistema.";
+        }
+        
+        // Mensaje genérico para otros casos
+        return "Se ha producido un error. Por favor, inténtelo de nuevo.";
     }
 }

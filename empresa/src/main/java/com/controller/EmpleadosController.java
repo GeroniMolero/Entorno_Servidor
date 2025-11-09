@@ -103,8 +103,47 @@ public class EmpleadosController extends HttpServlet {
 
     private void manejarError(Exception e, HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
-        // Log sencillo. En producción utilizar un logger (SLF4J/Log4j/Jul).
-        req.setAttribute("error", e.getMessage());
+        // Sanitizar mensaje para evitar exponer información técnica
+        String userMessage = sanitizeErrorMessage(e.getMessage());
+        req.setAttribute("error", userMessage);
         req.getRequestDispatcher("/WEB-INF/error.jsp").forward(req, res);
+    }
+
+    /**
+     * Sanitiza mensajes de error para evitar exponer información sensible.
+     * Permite mensajes de negocio pero oculta detalles técnicos (SQL, rutas, etc.)
+     */
+    private String sanitizeErrorMessage(String message) {
+        if (message == null || message.trim().isEmpty()) {
+            return "Se ha producido un error inesperado.";
+        }
+        
+        // Lista blanca: mensajes de negocio permitidos
+        String lowerMessage = message.toLowerCase();
+        if (lowerMessage.contains("dni") || 
+            lowerMessage.contains("empleado") || 
+            lowerMessage.contains("nómina") ||
+            lowerMessage.contains("nomina") ||
+            lowerMessage.contains("categoría") ||
+            lowerMessage.contains("años")) {
+            return message;
+        }
+        
+        // Lista negra: ocultar mensajes técnicos
+        if (lowerMessage.contains("sql") || 
+            lowerMessage.contains("connection") || 
+            lowerMessage.contains("database") ||
+            lowerMessage.contains("table") || 
+            lowerMessage.contains("column") ||
+            lowerMessage.contains("jdbc") ||
+            lowerMessage.contains("exception") ||
+            lowerMessage.contains("null pointer") ||
+            lowerMessage.contains("class") ||
+            lowerMessage.contains("stack")) {
+            return "Error al procesar la solicitud. Por favor, contacte al administrador del sistema.";
+        }
+        
+        // Mensaje genérico para otros casos
+        return "Se ha producido un error. Por favor, inténtelo de nuevo.";
     }
 }
