@@ -73,3 +73,10 @@ work/
 #############################################
 # FIN
 #############################################
+
+# ======== Documentación local (no versionar) ========
+ARQUITECTURA_Y_FUNCIONAMIENTO.md
+FRONT_CONTROLLER_GUIDE.md
+INTERFACES_GUIDE.md
+MEJORAS_IMPLEMENTADAS.md
+PATRONES_RESUMEN.md
