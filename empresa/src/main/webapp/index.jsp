@@ -19,9 +19,9 @@
                 <h2>Opciones principales</h2>
 
                 <nav class="menu-links">
-                    <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-menu">Ver todos los empleados</a>
-                    <a href="<c:url value='/NominasController?action=formSalario'/>" class="btn-menu">Consultar salario</a>
-                    <a href="<c:url value='/EmpleadosController?action=buscarForm'/>" class="btn-menu">Modificar empleado</a>
+                    <a href="<c:url value='/app/empleados?action=listar'/>" class="btn-menu">Ver todos los empleados</a>
+                    <a href="<c:url value='/app/nominas?action=formularioSalario'/>" class="btn-menu">Consultar salario</a>
+                    <a href="<c:url value='/app/empleados?action=buscarForm'/>" class="btn-menu">Modificar empleado</a>
                 </nav>
             </div>
         </section>

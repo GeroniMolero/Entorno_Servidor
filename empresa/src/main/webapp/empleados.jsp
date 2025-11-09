@@ -40,8 +40,8 @@
                                 <td>${empleado.categoria}</td>
                                 <td>${empleado.anyos}</td>
                                 <td>
-                                    <a class="btn-small" href="<c:url value='/EmpleadosController?action=editar&dni=${empleado.dni}'/>">Editar</a>
-                                    <a class="btn-small" href="<c:url value='/NominasController?dni=${empleado.dni}&action=mostrarSalario'/>">Ver salario</a>
+                                    <a class="btn-small" href="<c:url value='/app/empleados?action=editar&dni=${empleado.dni}'/>">Editar</a>
+                                    <a class="btn-small" href="<c:url value='/app/nominas?dni=${empleado.dni}&action=consultarSalario'/>">Ver salario</a>
                                 </td>
                                 </tr>
                             </c:forEach>

@@ -14,8 +14,8 @@
 
     <main>
         <section class="form-container">
-            <form action="<c:url value='/NominasController'/>" method="get" class="form-dark">
-                <input type="hidden" name="action" value="mostrarSalario" />
+            <form action="<c:url value='/app/nominas'/>" method="get" class="form-dark">
+                <input type="hidden" name="action" value="consultarSalario" />
 
                 <label for="dni">Introduce el DNI del empleado:</label>
                 <input type="text" id="dni" name="dni" required placeholder="Ej: 11111111A" maxlength="9">

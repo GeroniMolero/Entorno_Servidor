@@ -23,7 +23,13 @@
     <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
-        <version>4.11</version>
+        <version>4.13.2</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-core</artifactId>
+        <version>3.12.4</version>
         <scope>test</scope>
     </dependency>
     <dependency>
@@ -37,6 +43,12 @@
         <artifactId>mysql-connector-java</artifactId>
         <version>8.0.19</version>
     </dependency>
+  <!-- MariaDB driver to soportar servidores MariaDB y plugins como auth_gssapi_client -->
+  <dependency>
+    <groupId>org.mariadb.jdbc</groupId>
+    <artifactId>mariadb-java-client</artifactId>
+    <version>3.3.3</version>
+  </dependency>
     <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-dbcp2</artifactId>
@@ -52,11 +64,11 @@
         <artifactId>standard</artifactId>
         <version>1.1.2</version>
     </dependency>
-</dependencies>
+  </dependencies>
 
 
   <build>
-    <sourceDirectory>src</sourceDirectory>
+    <!-- Removed custom sourceDirectory to use Maven standard: src/main/java -->
     <finalName>empresa</finalName>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>

@@ -41,7 +41,7 @@
                                 <td>${empleado.categoria}</td>
                                 <td>${empleado.anyos}</td>
                                 <td>
-                                    <a class="btn-small" href="<c:url value='/EmpleadosController?action=editar&dni=${empleado.dni}'/>">Editar</a>
+                                    <a class="btn-small" href="<c:url value='/app/empleados?action=editar&dni=${empleado.dni}'/>">Editar</a>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -51,8 +51,8 @@
         </c:choose>
 
         <div class="acciones">
-            <a href="<c:url value='/EmpleadosController?action=buscarForm'/>" class="btn-secundario">Nueva búsqueda</a>
-            <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-secundario">Volver al listado</a>
+            <a href="<c:url value='/app/empleados?action=buscarForm'/>" class="btn-secundario">Nueva búsqueda</a>
+            <a href="<c:url value='/app/empleados?action=listar'/>" class="btn-secundario">Volver al listado</a>
         </div>
 
     </section>

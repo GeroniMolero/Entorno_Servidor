@@ -64,12 +64,12 @@
         <!-- Mostrar error si no se cargó el empleado -->
         <c:if test="${empty empleado}">
             <p class="error">❌ No se pudo cargar el empleado. Verifique el DNI.</p>
-            <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-secundario">Volver</a>
+            <a href="<c:url value='/app/empleados?action=listar'/>" class="btn-secundario">Volver</a>
         </c:if>
 
         <!-- Mostrar formulario si el empleado existe -->
         <c:if test="${not empty empleado}">
-            <form action="<c:url value='/EmpleadosController?action=actualizar'/>" method="post">
+            <form action="<c:url value='/app/empleados?action=actualizar'/>" method="post">
 
                 <!-- DNI -->
                 <label for="dni">DNI:</label>
@@ -100,7 +100,7 @@
                 <!-- Botones -->
                 <div class="acciones">
                     <input type="submit" value="Guardar cambios" class="btn">
-                    <a href="<c:url value='/EmpleadosController?action=listar'/>" class="btn-secundario">Cancelar</a>
+                    <a href="<c:url value='/app/empleados?action=listar'/>" class="btn-secundario">Cancelar</a>
                 </div>
             </form>
         </c:if>
