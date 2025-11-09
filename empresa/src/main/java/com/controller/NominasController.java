@@ -1,8 +1,6 @@
 package com.controller;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,12 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dao.EmpleadosDAO;
-import com.dao.IEmpleadoDAO;
-import com.dao.INominaDAO;
-import com.dao.NominasDAO;
-import com.model.Empleado;
-import com.model.Nomina;
+import com.service.INominaService;
+import com.service.NominaService;
 
 /**
  * Controlador para la gestión de nóminas.
@@ -28,13 +22,11 @@ import com.model.Nomina;
  */
 public class NominasController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private IEmpleadoDAO empleadosDAO;
-    private INominaDAO nominasDAO;
+    private INominaService nominaService;
 
     @Override
     public void init() throws ServletException {
-        empleadosDAO = new EmpleadosDAO(); // Inyección manual
-        nominasDAO = new NominasDAO();     // Inyección manual
+        nominaService = new NominaService();
     }
 
     @Override
@@ -51,7 +43,6 @@ public class NominasController extends HttpServlet {
                     request.getRequestDispatcher("/salarioForm.jsp").forward(request, response);
                     break;
                 case "consultarSalario":
-                    // Procesar consulta con DNI
                     consultarSalario(request, response);
                     break;
                 case "listarNominas":
@@ -75,35 +66,11 @@ public class NominasController extends HttpServlet {
      */
     private void consultarSalario(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-
         String dni = request.getParameter("dni");
-        
-        if (dni == null || dni.trim().isEmpty()) {
-            throw new IllegalArgumentException("El DNI proporcionado es nulo o vacío.");
-        }
-        
-        Empleado empleado = empleadosDAO.obtenerEmpleado(dni);
-
-        if (empleado == null) {
-            request.setAttribute("error", "No se encontró el empleado con DNI " + dni);
-        } else {
-            // Intentar obtener sueldo desde la tabla nominas
-            Map<String, Object> registro = nominasDAO.obtenerNomina(dni);
-            double salario;
-
-            if (registro != null) {
-                salario = (double) registro.get("sueldo");
-            } else {
-                // Si no hay registro, calcular el salario
-                Nomina nomina = new Nomina();
-                salario = nomina.sueldo(empleado);
-            }
-
-            request.setAttribute("empleado", empleado);
-            request.setAttribute("salario", salario);
-        }
-
-    request.getRequestDispatcher("/salarioResultado.jsp").forward(request, response);
+        Map<String, Object> datos = nominaService.consultarSalarioEmpleado(dni);
+        request.setAttribute("empleado", datos.get("empleado"));
+        request.setAttribute("salario", datos.get("salario"));
+        request.getRequestDispatcher("/salarioResultado.jsp").forward(request, response);
     }
 
     /**
@@ -111,29 +78,9 @@ public class NominasController extends HttpServlet {
      */
     private void listarNominas(HttpServletRequest request, HttpServletResponse response)
             throws Exception {
-
-        List<Empleado> empleados = empleadosDAO.listar();
-        List<Map<String, Object>> listaNominas = new ArrayList<>();
-
-        for (Empleado e : empleados) {
-            Map<String, Object> registro = nominasDAO.obtenerNomina(e.getDni());
-
-            Map<String, Object> datos = new HashMap<>();
-            datos.put("empleado", e);
-
-            if (registro != null) {
-                datos.put("salario", registro.get("sueldo"));
-            } else {
-                // Si no existe en BD, calcularlo
-                Nomina n = new Nomina();
-                datos.put("salario", n.sueldo(e));
-            }
-
-            listaNominas.add(datos);
-        }
-
+        List<Map<String, Object>> listaNominas = nominaService.listarTodasLasNominas();
         request.setAttribute("listaNominas", listaNominas);
-    request.getRequestDispatcher("/nominas.jsp").forward(request, response);
+        request.getRequestDispatcher("/nominas.jsp").forward(request, response);
     }
 
     @Override

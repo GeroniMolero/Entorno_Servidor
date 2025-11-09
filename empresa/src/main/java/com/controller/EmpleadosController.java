@@ -8,9 +8,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.dao.EmpleadosDAO;
-import com.dao.IEmpleadoDAO;
 import com.model.Empleado;
+import com.service.EmpleadoService;
+import com.service.IEmpleadoService;
 
 /**
  * Controlador para gestión de empleados.
@@ -21,11 +21,12 @@ import com.model.Empleado;
  */
 public class EmpleadosController extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private IEmpleadoDAO dao;
+    private IEmpleadoService empleadoService;
 
     @Override
     public void init() {
-        dao = new EmpleadosDAO(); // Inyección manual - podría mejorarse con DI container
+        // Inicializamos la capa de servicio (esta a su vez gestiona los DAOs)
+        empleadoService = new EmpleadoService();
     }
 
     @Override
@@ -40,7 +41,7 @@ public class EmpleadosController extends HttpServlet {
         try {
             switch (action) {
                 case "listar":
-                    List<Empleado> lista = dao.listar();
+                    List<Empleado> lista = empleadoService.listarEmpleados();
                     req.setAttribute("listaEmpleados", lista);
                     forward(req, res, "empleados.jsp");
                     break;
@@ -50,7 +51,7 @@ public class EmpleadosController extends HttpServlet {
                     break;
 
                 case "buscarResultado":
-                    req.setAttribute("listaEmpleados", dao.buscarPorCriterio(req));
+                    req.setAttribute("listaEmpleados", empleadoService.buscarEmpleadosPorCriterio(req));
                     forward(req, res, "WEB-INF/resultadoBusqueda.jsp");
                     break;
 
@@ -60,7 +61,7 @@ public class EmpleadosController extends HttpServlet {
                         throw new IllegalArgumentException("El DNI del empleado no fue proporcionado para la edición.");
                     }
 
-                    Empleado emp = dao.obtenerEmpleado(dni);
+                    Empleado emp = empleadoService.buscarEmpleadoPorDni(dni);
                     if (emp == null) {
                         req.setAttribute("error", "No se encontró el empleado con DNI: " + dni);
                     } else {
@@ -87,7 +88,7 @@ public class EmpleadosController extends HttpServlet {
 
         try {
             if ("actualizar".equals(action)) {
-                dao.actualizarEmpleado(req);
+                empleadoService.actualizarEmpleado(req);
                 res.sendRedirect(req.getContextPath() + "/app/empleados?action=listar");
             } else {
                 res.sendError(HttpServletResponse.SC_BAD_REQUEST, "Acción POST no reconocida: " + action);
