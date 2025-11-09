@@ -29,7 +29,7 @@ Sistema web que permite:
 
 ## Arquitectura del Sistema
 
-### Estructura por Capas (4 capas - Actualizado con Service Layer)
+### Estructura por Capas (4 capas con Service Layer integrado)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -52,7 +52,7 @@ Sistema web que permite:
        └──────────┬───────────┘
                   │
 ┌─────────────────▼─────────────────┐
-│     CAPA DE SERVICIO (NUEVA)   │
+│       CAPA DE SERVICIO            │
 │  IEmpleadoService │ INominaService │
 │  (Lógica de negocio + validación) │
 └─────────────────┬─────────────────┘
@@ -78,7 +78,7 @@ Sistema web que permite:
 - **Presentación (JSP)**: Renderiza HTML usando datos del request, sin lógica de negocio
 - **Front Controller**: Recibe todas las peticiones `/app/*` y las enruta al controlador correspondiente
 - **Controladores**: Procesan peticiones HTTP, delegan a servicios, preparan datos y hacen forward a JSPs
-- **Servicios (NUEVO)**: Encapsulan lógica de negocio, validaciones, coordinan múltiples DAOs, transacciones
+- **Servicios**: Encapsulan lógica de negocio, validaciones, coordinan múltiples DAOs, transacciones
 - **DAOs**: Acceso exclusivo a base de datos, implementan interfaces para desacoplamiento
 - **Modelos**: Objetos del dominio (Empleado, Nomina, Persona)
 
@@ -184,18 +184,18 @@ Controller → IEmpleadoDAO (interfaz) → EmpleadosDAO (implementación) → BD
 - `obtenerNomina(String dni)` - Recuperar sueldo almacenado
 - `actualizarSueldo(String dni, double sueldo)` - Actualizar sueldo
 
-**Uso en Controllers**:
+**Uso en Controllers (actualizado con Service Layer)**:
 ```java
 public class EmpleadosController {
-    private IEmpleadoDAO dao; // Interfaz, no implementación
+    private IEmpleadoService empleadoService; // Inyectamos servicio
     
     @Override
     public void init() {
-        dao = new EmpleadosDAO(); // Inyección manual
+        empleadoService = new EmpleadoService(); // Service maneja DAOs
     }
     
     protected void doGet(...) {
-        List<Empleado> empleados = dao.listar();
+        List<Empleado> empleados = empleadoService.listarEmpleados();
     }
 }
 ```
@@ -239,7 +239,7 @@ Cliente → FrontController → Controller específico → DAO → BD
 
 ---
 
-### 6. Service Layer Pattern NUEVO
+### 6. Service Layer Pattern
 **Interfaces**: `IEmpleadoService`, `INominaService`  
 **Implementaciones**: `EmpleadoService`, `NominaService`
 
@@ -334,7 +334,7 @@ public void testConsultarSalario() {
 
 ---
 
-## Flujo de una Petición Completa (Actualizado con Service Layer)
+## Flujo de una Petición Completa (con Service Layer integrado)
 
 **Ejemplo: Listar empleados**
 
@@ -347,11 +347,11 @@ public void testConsultarSalario() {
 
 3. EmpleadosController.doGet()
    - Lee parameter action=listar
-   - Invoca service.listarEmpleados() (ANTES: dao.listar())
+   - Invoca empleadoService.listarEmpleados()
    
-4. EmpleadoService.listarEmpleados() NUEVO
+4. EmpleadoService.listarEmpleados()
    - Validaciones de negocio
-   - Invoca dao.listar()
+   - Invoca empleadoDAO.listar()
    - Retorna List<Empleado>
 
 5. EmpleadosDAO.listar()
@@ -364,11 +364,11 @@ public void testConsultarSalario() {
    - request.setAttribute("listaEmpleados", lista)
    - forward a /empleados.jsp
 
-6. JSP renderiza HTML
+7. JSP renderiza HTML
    - Itera con <c:forEach>
    - Genera tabla HTML
 
-7. Respuesta al navegador
+8. Respuesta al navegador
 ```
 
 **Ejemplo: Consultar salario**
@@ -382,9 +382,9 @@ public void testConsultarSalario() {
 3. GET /empresa/app/nominas?action=consultarSalario&dni=12345678A
 
 4. NominasController.consultarSalario()
-   - Invoca service.consultarSalarioEmpleado(dni) (ANTES: DAO directo)
+   - Invoca nominaService.consultarSalarioEmpleado(dni)
 
-5. NominaService.consultarSalarioEmpleado(dni) NUEVO
+5. NominaService.consultarSalarioEmpleado(dni)
    - Valida DNI no nulo ni vacío
    - Busca empleado: empleadoDAO.obtenerEmpleado(dni)
    - Busca nómina: nominaDAO.obtenerNomina(dni)
@@ -446,41 +446,47 @@ empresa/
 ├── pom.xml                           # Maven build configuration
 ├── README.md                         # Este archivo
 ├── src/
-│   ├── com/
-│   │   ├── conexion/
-│   │   │   └── Conexion.java         # Singleton pool conexiones
-│   │   ├── controller/
-│   │   │   ├── FrontController.java  # Front Controller pattern
-│   │   │   ├── EmpleadosController.java
-│   │   │   └── NominasController.java
-│   │   ├── service/ NUEVO
-│   │   │   ├── IEmpleadoService.java # Interfaz servicio empleados
-│   │   │   ├── INominaService.java   # Interfaz servicio nóminas
-│   │   │   ├── EmpleadoService.java  # Implementación
-│   │   │   └── NominaService.java    # Implementación
-│   │   ├── dao/
-│   │   │   ├── IEmpleadoDAO.java     # Interfaz DAO empleados
-│   │   │   ├── INominaDAO.java       # Interfaz DAO nóminas
-│   │   │   ├── GenericDAO.java       # Interfaz genérica base
-│   │   │   ├── EmpleadosDAO.java     # Implementación
-│   │   │   └── NominasDAO.java       # Implementación
-│   │   ├── model/
-│   │   │   ├── Persona.java          # Clase padre
-│   │   │   ├── Empleado.java         # Modelo empleado
-│   │   │   └── Nomina.java           # Lógica cálculo salario
-│   │   ├── factory/
-│   │   │   └── EmpleadoFactory.java  # Factory pattern
-│   │   ├── builder/
-│   │   │   └── EmpleadoBuilder.java  # Builder pattern
-│   │   └── exceptions/
-│   │       └── DatosNoCorrectosException.java
 │   └── main/
+│       ├── java/
+│       │   └── com/
+│       │       ├── builder/
+│       │       │   └── EmpleadoBuilder.java  # Builder pattern
+│       │       ├── conexion/
+│       │       │   ├── Conexion.java         # Singleton pool conexiones
+│       │       │   └── gestion_de_nominas.sql # Script BD
+│       │       ├── controller/
+│       │       │   ├── FrontController.java  # Front Controller pattern
+│       │       │   ├── EmpleadosController.java
+│       │       │   └── NominasController.java
+│       │       ├── dao/
+│       │       │   ├── GenericDAO.java       # Interfaz genérica base
+│       │       │   ├── IEmpleadoDAO.java     # Interfaz DAO empleados
+│       │       │   ├── INominaDAO.java       # Interfaz DAO nóminas
+│       │       │   ├── EmpleadosDAO.java     # Implementación
+│       │       │   └── NominasDAO.java       # Implementación
+│       │       ├── exceptions/
+│       │       │   └── DatosNoCorrectosException.java
+│       │       ├── factory/
+│       │       │   └── EmpleadoFactory.java  # Factory pattern
+│       │       ├── model/
+│       │       │   ├── Persona.java          # Clase padre
+│       │       │   ├── Empleado.java         # Modelo empleado
+│       │       │   └── Nomina.java           # Lógica cálculo salario
+│       │       └── service/
+│       │           ├── IEmpleadoService.java # Interfaz servicio empleados
+│       │           ├── INominaService.java   # Interfaz servicio nóminas
+│       │           ├── EmpleadoService.java  # Implementación
+│       │           └── NominaService.java    # Implementación
+│       ├── resources/
+│       │   └── application.properties        # Config externalizada (BD)
 │       └── webapp/
 │           ├── index.jsp             # Página principal
 │           ├── empleados.jsp         # Listado empleados
 │           ├── nominas.jsp           # Listado nóminas
 │           ├── salarioForm.jsp       # Form consulta salario
 │           ├── salarioResultado.jsp  # Resultado salario
+│           ├── frontControllerDemo.jsp # Demo Front Controller
+│           ├── detalleEmpleado.jsp   # Detalle empleado
 │           ├── styles/
 │           │   └── global.css        # Estilos
 │           └── WEB-INF/
@@ -489,6 +495,11 @@ empresa/
 │               ├── editarEmpleado.jsp
 │               ├── resultadoBusqueda.jsp
 │               └── error.jsp         # Página error centralizada
+│   └── test/
+│       └── java/
+│           └── com/
+│               └── service/
+│                   └── EmpleadoServiceTest.java # Tests JUnit + Mockito
 └── target/
     └── empresa.war                   # WAR generado
 ```
@@ -642,6 +653,12 @@ db.driver=com.mysql.cj.jdbc.Driver
 - Permite cambiar de MySQL a MariaDB sólo editando el properties
 
 **Uso**: `Conexion.java` lee automáticamente este archivo vía ClassLoader.
+
+---
+
+## Explicación Resumida (Elevator Pitch)
+
+> "Aplicación web Java EE que implementa **arquitectura de 4 capas** con Front Controller centralizando todas las peticiones HTTP. Los controladores delegan en **servicios que encapsulan lógica de negocio**, validaciones y coordinación de múltiples DAOs. Los DAOs están abstraídos mediante interfaces (IEmpleadoDAO, INominaDAO), reduciendo acoplamiento y facilitando testing con mocks (JUnit + Mockito). La creación de objetos Empleado está centralizada con Factory y facilitada por Builder. La conexión a base de datos usa Singleton con pool DBCP2 para eficiencia, leyendo configuración desde properties externos. Las vistas JSP únicamente presentan datos usando JSTL. El sistema implementa **6 patrones de diseño** profesionales y cuenta con tests sin base de datos (EmpleadoServiceTest)."
 
 ---
 
