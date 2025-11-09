@@ -52,7 +52,7 @@ Sistema web que permite:
        └──────────┬───────────┘
                   │
 ┌─────────────────▼─────────────────┐
-│    ✨ CAPA DE SERVICIO (NUEVA)   │
+│     CAPA DE SERVICIO (NUEVA)   │
 │  IEmpleadoService │ INominaService │
 │  (Lógica de negocio + validación) │
 └─────────────────┬─────────────────┘
@@ -642,39 +642,6 @@ db.driver=com.mysql.cj.jdbc.Driver
 - Permite cambiar de MySQL a MariaDB sólo editando el properties
 
 **Uso**: `Conexion.java` lee automáticamente este archivo vía ClassLoader.
-
----
-
-## Posibles Mejoras Futuras
-
-1. **Actualizar Controllers**: Delegar a Services en lugar de DAOs directos
-2. **Más tests**: Añadir tests para `NominaService` y otros servicios
-3. **Spring Framework**: Inyección de dependencias automática (`@Autowired`)
-4. **Seguridad**: Autenticación, autorización por roles (Spring Security)
-5. **Paginación**: Listados grandes con paginación
-6. **Validaciones**: JSR-303 Bean Validation en modelos
-7. **Internacionalización**: Soporte multi-idioma (i18n)
-8. **REST API**: Endpoints REST para integración con frontend moderno
-9. **Cache**: Redis/Ehcache para consultas frecuentes
-10. **Logging**: SLF4J + Logback en lugar de printStackTrace
-11. **Profiles Maven**: dev, test, prod con application-{profile}.properties
-12. **CI/CD**: Pipeline automatizado (GitHub Actions, Jenkins)
-
----
-
-## Explicación Resumida (Elevator Pitch)
-
-> "Aplicación web Java EE que aplica **arquitectura de 4 capas** con Front Controller centralizando todas las peticiones HTTP. Los controladores delegan en **servicios que encapsulan lógica de negocio**, validaciones y coordinación de múltiples DAOs. Los DAOs están abstraídos mediante interfaces, reduciendo acoplamiento y facilitando testing con mocks (Mockito). La creación de objetos Empleado está centralizada con Factory y facilitada por Builder. La conexión a base de datos usa Singleton con pool DBCP2 para eficiencia, leyendo configuración desde properties externos. Las vistas JSP únicamente presentan datos usando JSTL. El sistema implementa **6 patrones de diseño** profesionales y está preparado para testing exhaustivo sin base de datos."
-
----
-
-## Documentación Adicional
-
-- **`PATRONES_RESUMEN.md`**: Documentación completa de los 6 patrones implementados con ejemplos
-- **`INTERFACES_GUIDE.md`**: Guía sobre uso de interfaces DAO y Service
-- **`FRONT_CONTROLLER_GUIDE.md`**: Guía detallada del Front Controller
-- **`ARQUITECTURA_Y_FUNCIONAMIENTO.md`**: Análisis profundo de la arquitectura
-- **`MEJORAS_IMPLEMENTADAS.md`**: Detalles de las mejoras críticas (Maven, Service Layer, Testing)
 
 ---
 
