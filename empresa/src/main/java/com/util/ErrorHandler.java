@@ -1,10 +1,11 @@
 package com.util;
 
+import java.io.IOException;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 /**
  * Clase utilitaria para manejo centralizado de errores.
@@ -109,6 +110,7 @@ public class ErrorHandler {
     /**
      * Versión simplificada de handleError para controladores que no usan
      * diferenciación entre development/production (siempre sanitizan).
+     * Loguea el stack trace completo en el servidor para debugging.
      * 
      * @param e La excepción a manejar
      * @param request La petición HTTP
@@ -120,6 +122,16 @@ public class ErrorHandler {
                                         HttpServletResponse response) 
             throws ServletException, IOException {
         
+        // Loguear error completo usando ServletContext logger (aparece en localhost.log)
+        request.getServletContext().log("=== ERROR EN APLICACIÓN ===");
+        request.getServletContext().log("Timestamp: " + new java.util.Date());
+        request.getServletContext().log("URI: " + request.getRequestURI());
+        request.getServletContext().log("Método: " + request.getMethod());
+        request.getServletContext().log("Mensaje original: " + e.getMessage());
+        request.getServletContext().log("Stack trace:", e);
+        request.getServletContext().log("===========================");
+        
+        // Sanitizar mensaje para usuario final
         String userMessage = sanitizeErrorMessage(e.getMessage());
         request.setAttribute("error", userMessage);
         request.getRequestDispatcher("/WEB-INF/error.jsp").forward(request, response);

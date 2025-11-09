@@ -562,23 +562,29 @@ String mensaje = ErrorHandler.sanitizeErrorMessage(exception.getMessage());
 // Manejo completo con modo development/production (usado en FrontController)
 ErrorHandler.handleError(e, request, response, getServletContext());
 
-// Manejo simplificado sin diferenciación de entorno (otros controladores)
+// Manejo simplificado con logging automático (EmpleadosController, NominasController)
 ErrorHandler.handleErrorSimple(e, request, response);
 
-// Obtener stack trace como String (para logging)
+// Obtener stack trace como String (para logging personalizado)
 String stackTrace = ErrorHandler.getStackTraceAsString(exception);
 ```
 
 **Ventajas de la centralización**:
-- ✅ DRY: Lógica de sanitización en un solo lugar
-- ✅ Mantenibilidad: Cambios en reglas de sanitización solo requieren modificar `ErrorHandler`
-- ✅ Reutilización: Cualquier clase puede usar los métodos estáticos
-- ✅ Testing: Fácil probar unitariamente sin instanciar servlets
-- ✅ Controladores más ligeros: Solo orquestan, no gestionan detalles de errores
+- **DRY**: Lógica de sanitización en un solo lugar
+- **Mantenibilidad**: Cambios en reglas de sanitización solo requieren modificar `ErrorHandler`
+- **Reutilización**: Cualquier clase puede usar los métodos estáticos
+- **Testing**: Fácil probar unitariamente sin instanciar servlets
+- **Logging automático**: Todos los errores se registran en logs del servidor
+- **Controladores más ligeros**: Solo orquestan, no gestionan detalles de errores
 
 **Reglas de sanitización implementadas**:
 - **Lista blanca** (se permiten): dni, empleado, nómina, categoría, salario, años
 - **Lista negra** (se bloquean): sql, connection, database, table, column, jdbc, exception, nullpointer, class, stack
+
+**Logging de errores**:
+- `handleErrorSimple()` registra automáticamente en `ServletContext.log()` (archivo `localhost.YYYY-MM-DD.log`)
+- Información logueada: timestamp, URI, método HTTP, mensaje original y stack trace completo
+- Usuario final solo ve mensaje sanitizado, desarrollador tiene detalles completos en logs
 
 ---
 
@@ -708,6 +714,36 @@ mvn clean package
 http://localhost:8080/empresa/
 ```
 
+### Debugging y Logs
+
+**Ver errores en logs de Tomcat** (Windows):
+```powershell
+# Logs de aplicación (aquí van los errores de ErrorHandler)
+Get-Content "C:\Program Files\Apache Software Foundation\Tomcat 9.0\logs\localhost.YYYY-MM-DD.log" -Tail 50
+
+# Monitoreo en tiempo real
+Get-Content "C:\Program Files\Apache Software Foundation\Tomcat 9.0\logs\localhost.YYYY-MM-DD.log" -Tail 50 -Wait
+
+# Buscar errores específicos
+Select-String -Path "C:\Program Files\Apache Software Foundation\Tomcat 9.0\logs\localhost.*.log" -Pattern "ERROR EN APLICACIÓN" -Context 0,10
+```
+
+**Ver errores en logs de Tomcat** (Linux/Mac):
+```bash
+# Logs de aplicación
+tail -f $CATALINA_HOME/logs/localhost.YYYY-MM-DD.log
+
+# Buscar errores específicos
+grep -A 10 "ERROR EN APLICACIÓN" $CATALINA_HOME/logs/localhost.*.log
+```
+
+**Información logueada por ErrorHandler**:
+- Timestamp del error
+- URI de la petición
+- Método HTTP (GET/POST)
+- Mensaje original de la excepción
+- Stack trace completo
+
 ---
 
 ## Principios SOLID Aplicados
@@ -758,8 +794,8 @@ Todos los errores se centralizan y sanitizan según el entorno configurado.
 - Conexiones cerradas con try-with-resources
 
 **Mensajes sanitizados**:
-- ✅ Permitidos: "DNI no proporcionado", "Empleado no encontrado"
-- ❌ Bloqueados: "SQLException: Table 'nominas' doesn't exist", "NullPointerException at line 45"
+- Permitidos: "DNI no proporcionado", "Empleado no encontrado"
+- Bloqueados: "SQLException: Table 'nominas' doesn't exist", "NullPointerException at line 45"
 
 ---
 
